@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Dark background with slight green border/glow effect simulation -->
+  <rect width="90" height="90" x="5" y="5" rx="15" fill="#050505" stroke="#22c55e" stroke-width="2" />
+  
+  <!-- Terminal Prompt symbol '$' -->
+  <text x="50" y="62" font-family="Courier New, monospace" font-size="55" font-weight="900" fill="#22c55e" text-anchor="middle">$</text>
+  
+  <!-- Blinking Underscore Cursor simulation -->
+  <rect x="70" y="55" width="12" height="6" fill="#22c55e" />
+</svg>
