@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 220 13% 5%;
+    --foreground: 210 14% 83%;
+
+    --card: 220 14% 10%;
+    --card-foreground: 210 14% 83%;
+
+    --popover: 220 14% 10%;
+    --popover-foreground: 210 14% 83%;
+
+    --primary: 120 100% 50%;
+    --primary-foreground: 220 13% 5%;
+
+    --secondary: 220 14% 14%;
+    --secondary-foreground: 210 14% 83%;
+
+    --muted: 220 14% 14%;
+    --muted-foreground: 215 14% 55%;
+
+    --accent: 120 100% 50%;
+    --accent-foreground: 220 13% 5%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 14% 20%;
+    --input: 215 14% 20%;
+    --ring: 120 100% 50%;
+
+    --radius: 0.5rem;
+
+    /* Custom terminal colors */
+    --terminal-green: 120 100% 50%;
+    --terminal-blue: 212 100% 67%;
+    --github-dark: 220 13% 5%;
+    --github-card: 220 14% 10%;
+    --github-border: 215 14% 20%;
+    --github-text: 210 14% 83%;
+    --github-muted: 215 14% 55%;
+
+    /* Language colors */
+    --lang-javascript: 53 93% 54%;
+    --lang-typescript: 211 60% 48%;
+    --lang-python: 207 51% 44%;
+    --lang-java: 18 89% 51%;
+    --lang-kotlin: 280 75% 60%;
+    --lang-dart: 195 100% 40%;
+    --lang-html: 12 77% 52%;
+    --lang-css: 264 77% 52%;
+
+    --sidebar-background: 220 14% 10%;
+    --sidebar-foreground: 210 14% 83%;
+    --sidebar-primary: 120 100% 50%;
+    --sidebar-primary-foreground: 220 13% 5%;
+    --sidebar-accent: 220 14% 14%;
+    --sidebar-accent-foreground: 210 14% 83%;
+    --sidebar-border: 215 14% 20%;
+    --sidebar-ring: 120 100% 50%;
+  }
+
+  .dark {
+    --background: 220 13% 5%;
+    --foreground: 210 14% 83%;
+    --card: 220 14% 10%;
+    --card-foreground: 210 14% 83%;
+    --popover: 220 14% 10%;
+    --popover-foreground: 210 14% 83%;
+    --primary: 120 100% 50%;
+    --primary-foreground: 220 13% 5%;
+    --secondary: 220 14% 14%;
+    --secondary-foreground: 210 14% 83%;
+    --muted: 220 14% 14%;
+    --muted-foreground: 215 14% 55%;
+    --accent: 120 100% 50%;
+    --accent-foreground: 220 13% 5%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 215 14% 20%;
+    --input: 215 14% 20%;
+    --ring: 120 100% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    cursor: none !important;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+  }
+}
+
+@layer components {
+  .terminal-glow {
+    text-shadow: 0 0 4px hsl(var(--primary) / 0.4), 0 0 8px hsl(var(--primary) / 0.15);
+  }
+
+  .terminal-box-glow {
+    box-shadow: 0 0 10px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.1), inset 0 0 20px hsl(var(--primary) / 0.05);
+  }
+
+  .github-card {
+    @apply bg-card border border-border rounded-md p-4 transition-all duration-300;
+  }
+
+  .github-card:hover {
+    @apply border-primary/50;
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.1);
+  }
+
+  .neon-border {
+    @apply border border-primary/30;
+  }
+
+  .neon-text {
+    @apply text-primary terminal-glow;
+  }
+
+  .code-block {
+    @apply bg-secondary/50 border border-border rounded-md p-4 font-mono text-sm;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border;
+  }
+
+  .grid-background {
+    background-image:
+      linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .scanline {
+    background: linear-gradient(to bottom,
+        transparent 50%,
+        hsl(var(--primary) / 0.03) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+  }
+}
+
+@layer utilities {
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary) / 0.5);
+}
+
+/* Blinking cursor animation */
+@keyframes blink {
+
+  0%,
+  50% {
+    opacity: 1;
+  }
+
+  51%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: blink 1s infinite;
+}
+
+/* Typewriter cursor */
+@keyframes typewriter-cursor {
+
+  0%,
+  100% {
+    border-color: hsl(var(--primary));
+  }
+
+  50% {
+    border-color: transparent;
+  }
+}
+
+.typewriter-cursor::after {
+  content: '|';
+  animation: blink 0.8s infinite;
+  color: hsl(var(--primary));
+}
+
+/* Glitch effect */
+@keyframes glitch {
+
+  0%,
+  90%,
+  100% {
+    transform: translate(0);
+  }
+
+  92% {
+    transform: translate(-2px, 1px);
+  }
+
+  94% {
+    transform: translate(2px, -1px);
+  }
+
+  96% {
+    transform: translate(-1px, 2px);
+  }
+
+  98% {
+    transform: translate(1px, -2px);
+  }
+}
+
+.glitch:hover {
+  animation: glitch 0.3s ease-in-out;
+}
