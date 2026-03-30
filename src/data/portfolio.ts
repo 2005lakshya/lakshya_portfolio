@@ -17,8 +17,8 @@ export const aboutData = {
   bio: `const lakshya = {
   role: "Developer / Data Science",
   interests: ["AppDev", "AI", "Web Dev"],
-  lookingFor: "Summer Internship 2025",
-  education: "B.Tech Computer Science",
+  lookingFor: "Summer Internship",
+  education: "B.Tech Computer Science (Data Science0",
   location: "India"
 }`,
   skills: [
@@ -90,7 +90,7 @@ function generateContributions() {
   const weeks = 52;
   const days = 7;
   const contributions: number[][] = [];
-  
+
   for (let w = 0; w < weeks; w++) {
     const week: number[] = [];
     for (let d = 0; d < days; d++) {
