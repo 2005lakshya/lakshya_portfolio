@@ -62,7 +62,7 @@ const About = () => {
                   {"  "}
                   <span className="text-primary">lookingFor</span>
                   <span className="text-muted-foreground">:</span>{" "}
-                  <span className="text-lang-javascript">"Summer Internship 2025"</span>
+                  <span className="text-lang-javascript">"Internships"</span>
                   <span className="text-muted-foreground">,</span>
                   {"\n"}
                   {"  "}
