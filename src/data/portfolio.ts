@@ -111,14 +111,14 @@ export const experienceData = [
   {
     hash: "8e2a1b4",
     title: "Secretary @ IEEE TEMS, VIT",
-    date: "August 2024 - Present",
+    date: "December 2025 - Present",
     type: "feat",
     description: "Led a 100+ member chapter, overseeing multiple technical initiatives and driving a 20% increase in engagement through a mentorship program. Coordinated cross-team efforts and helped organize CodeRush 3.0 and HackXpertise 2.0 at graVITas’25, attracting 250+ participants.",
   },
   {
     hash: "7b2d4e9",
     title: "Summer Intern @ Havells India Limited",
-    date: "May 2024 - July 2024",
+    date: "May 2025 - July 2025",
     type: "feat",
     description: "Developed a Student Data Management System using ASP.NET MVC (C#) and PostgreSQL. Built secure authentication with role-based access. Completed independently with weekly mentor reviews.",
   },

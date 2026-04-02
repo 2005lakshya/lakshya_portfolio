@@ -4,6 +4,7 @@ import { motion, useSpring, useMotionValue } from "framer-motion";
 const CustomCursor = () => {
   const [isHovering, setIsHovering] = useState(false);
   const [isClicking, setIsClicking] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
@@ -13,6 +14,16 @@ const CustomCursor = () => {
   const cursorYSpring = useSpring(cursorY, springConfig);
 
   useEffect(() => {
+    // Only enable if device isn't touch-capable and has a viewport width for desktop
+    const checkIsDesktop = () => {
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isLargeScreen = window.innerWidth >= 1024;
+      setIsVisible(!isTouch && isLargeScreen);
+    };
+
+    checkIsDesktop();
+    window.addEventListener('resize', checkIsDesktop);
+
     const moveCursor = (e: MouseEvent) => {
       cursorX.set(e.clientX);
       cursorY.set(e.clientY);
@@ -42,12 +53,15 @@ const CustomCursor = () => {
     window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
+      window.removeEventListener('resize', checkIsDesktop);
       window.removeEventListener("mousemove", moveCursor);
       window.removeEventListener("mouseover", handleMouseOver);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
     };
   }, [cursorX, cursorY]);
+
+  if (!isVisible) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[9999]">

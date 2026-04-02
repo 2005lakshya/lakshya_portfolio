@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -91,11 +91,24 @@
 @layer base {
   * {
     @apply border-border;
-    cursor: none !important;
+  }
+
+  @media (pointer: fine) {
+    * {
+      cursor: none !important;
+    }
+  }
+
+  body, button, input, textarea, select {
+    font-family: 'JetBrains Mono', monospace !important;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight;
   }
 
   html {
@@ -160,7 +173,7 @@
   }
 
   .font-sans {
-    font-family: 'Inter', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
   }
 
   .text-gradient {
@@ -252,4 +265,42 @@
 
 .glitch:hover {
   animation: glitch 0.3s ease-in-out;
+}
+/* System Scanning Line Animation */
+@keyframes scanline {
+  0% { transform: translateY(-100%); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(100vh); opacity: 0; }
+}
+
+.scanline-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(34, 197, 94, 0.4) 50%, 
+    transparent 100%
+  );
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+  z-index: 10;
+  pointer-events: none;
+  animation: scanline 8s linear infinite;
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+.pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
 }

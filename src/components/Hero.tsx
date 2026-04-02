@@ -9,7 +9,7 @@ const Hero = () => {
   };
 
   return (
-    <section id="home" className="min-h-screen pt-20 flex items-center justify-center relative overflow-hidden scroll-mt-20">
+    <section id="home" className="min-h-screen pt-12 flex items-center justify-center relative overflow-hidden scroll-mt-20">
       {/* Grid background */}
       <div className="grid-background absolute inset-0" />
 
@@ -53,7 +53,7 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-5xl md:text-7xl font-bold mb-4"
+            className="text-3xl sm:text-4xl md:text-6xl font-bold mb-4"
           >
             <span className="text-primary terminal-glow">{"{"}</span>
             <span className="text-white">{profileData.name}</span>
@@ -65,58 +65,84 @@ const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-xl md:text-2xl text-muted-foreground mb-8 font-mono"
+            className="text-lg md:text-xl text-muted-foreground mb-8 font-mono"
           >
             <span className="text-primary">&gt;</span> {profileData.role}
             <span className="cursor-blink text-primary ml-1">_</span>
           </motion.p>
 
-          {/* Terminal Info Box */}
+          {/* Terminal Window Header - Command Center Style */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="max-w-2xl mx-auto mb-10"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="relative rounded-[1.5rem] bg-white/[0.02] backdrop-blur-2xl border border-white/5 shadow-2xl overflow-hidden group max-w-2xl mx-auto mb-10"
           >
-            <div className="bg-black/60 backdrop-blur-md border-2 border-green-500/30 rounded-lg overflow-hidden">
-              {/* Terminal header */}
-              <div className="bg-green-500/10 border-b border-green-500/30 px-4 py-2 flex items-center gap-2">
+            {/* Window Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/[0.01]">
+              <div className="flex items-center gap-3">
                 <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                  <div className="w-2 h-2 rounded-full bg-[#FF5F56] shadow-[0_0_10px_rgba(255,95,86,0.2)]" />
+                  <div className="w-2 h-2 rounded-full bg-[#FFBD2E] shadow-[0_0_10px_rgba(255,189,46,0.2)]" />
+                  <div className="w-2 h-2 rounded-full bg-[#27C93F] shadow-[0_0_10px_rgba(39,201,63,0.2)] animate-pulse" />
                 </div>
-                <span className="text-green-400 text-xs font-mono ml-2">lakshya@dev:~$</span>
+                <div className="ml-4 flex items-center gap-3 text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.2em]">
+                  <span className="w-1 h-1 rounded-full bg-primary/20" />
+                  <span>lakshya@dev — session:whoami</span>
+                </div>
+              </div>
+              <ArrowDown size={14} className="text-primary/30 animate-bounce" />
+            </div>
+
+            {/* Terminal content - Optimized for all screens */}
+            <div className="p-5 sm:p-6 md:p-8 font-mono text-xs sm:text-sm space-y-6 text-left bg-transparent min-h-[240px] flex flex-col">
+              <div className="flex items-center gap-3 text-primary/80">
+                <span className="text-primary text-xs font-black">$</span>
+                <span className="text-xs font-bold tracking-widest text-[#27C93F]">cat status.txt</span>
+              </div>
+              
+              <div className="space-y-4 border-l-2 border-primary/20 pl-4 sm:pl-5 ml-1.5 flex-1">
+                <div className="group/line flex items-center gap-3 transition-all">
+                  <span className="text-primary/60 shrink-0">→</span> 
+                  <p className="text-gray-300 md:text-[13px] leading-relaxed">
+                    Status: <span className="text-white font-medium">Unemployed (but will make it sound cool)</span>
+                  </p>
+                </div>
+                <div className="group/line flex items-center gap-3 transition-all">
+                  <span className="text-primary/60 shrink-0">→</span> 
+                  <p className="text-gray-300 md:text-[13px] leading-relaxed">
+                    Currently accepting: <span className="text-white font-medium">Job offers, freelance gigs, or free pizza</span>
+                  </p>
+                </div>
+                <div className="group/line flex items-center gap-3 transition-all">
+                  <span className="text-primary/60 shrink-0">→</span> 
+                  <p className="text-gray-300 md:text-[13px] leading-relaxed">
+                    Skills: <span className="text-white font-medium">Turning coffee into code & bugs into features</span>
+                  </p>
+                </div>
+                <div className="group/line flex items-center gap-3 transition-all">
+                  <span className="text-yellow-400 shrink-0">⚠</span> 
+                   <p className="text-gray-300 md:text-[13px] leading-relaxed italic opacity-80">
+                    <span className="text-yellow-400/60 font-bold uppercase text-[10px] mr-2">Warning:</span>
+                    Known to turn absolute chaos into a feature (mostly by accident)
+                  </p>
+                </div>
               </div>
 
-              {/* Terminal content */}
-              <div className="p-6 font-mono text-sm space-y-3">
-                <div className="text-green-400">
-                  <span className="text-green-500">$</span> cat status.txt
+              {/* Download Resume Action */}
+              <div className="pt-4 mt-2 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                   <span className="text-primary text-xs font-black">$</span>
+                   <span className="text-[12px] font-mono text-primary/80 tracking-widest">curl -O resume.pdf</span>
                 </div>
-                <div className="text-gray-300 pl-4 space-y-1">
-                  <p><span className="text-green-400">→</span> Status: Unemployed (but will make it sound cool)</p>
-                  <p><span className="text-green-400">→</span> Currently accepting: Job offers, freelance gigs, or free pizza</p>
-                  <p><span className="text-green-400">→</span> Skills: Turning coffee into code & bugs into features</p>
-                  <p><span className="text-yellow-400">⚠</span> Warning: Known to turn absolute chaos into a feature (mostly by accident)</p>
-                </div>
-                {/* Inline Download Resume action inside terminal */}
-                <div className="pt-3">
-                  <span className="text-green-400"><span className="text-green-500">$</span> curl -O resume.pdf</span>
-                  <div className="mt-2">
-                    <a
-                      href="/Lakshya_Gupta_Resume.pdf"
-                      download
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-green-500/40 text-green-400 hover:bg-green-500/10 transition-colors"
-                    >
-                      <FileDown size={16} />
-                      <span>Download Resume</span>
-                    </a>
-                  </div>
-                </div>
-                <div className="text-green-400 pt-2">
-                  <span className="text-green-500">$</span> <span className="cursor-blink">_</span>
-                </div>
+                <a
+                  href="/Lakshya_Gupta_Resume.pdf"
+                  download
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl border border-primary/20 bg-primary/10 text-primary font-bold text-[10px] tracking-widest uppercase hover:bg-primary/20 hover:scale-105 transition-all shadow-[0_0_15px_rgba(34,197,94,0.15)] group/btn"
+                >
+                  <FileDown size={14} className="group-hover/btn:-translate-y-0.5 transition-transform" />
+                  <span>Download Resume</span>
+                </a>
               </div>
             </div>
           </motion.div>
