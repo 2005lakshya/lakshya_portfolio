@@ -56,6 +56,16 @@ npm run dev
 
 Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
+### Cloudflare Pages
+
+This app is ready for Cloudflare Pages deployment.
+
+- Build command: `npm run build`
+- Build output directory: `dist`
+- SPA fallback: handled by [public/_redirects](public/_redirects)
+
+If you deploy through the Cloudflare dashboard, use the settings above. If you deploy with the CLI, the same build output applies.
+
 ## Can I connect a custom domain to my Lovable project?
 
 Yes, you can!
