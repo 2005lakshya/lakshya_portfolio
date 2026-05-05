@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,46 +7,44 @@
 
 @layer base {
   :root {
-    --background: 220 13% 5%;
-    --foreground: 210 14% 83%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-    --card: 220 14% 10%;
-    --card-foreground: 210 14% 83%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 220 14% 10%;
-    --popover-foreground: 210 14% 83%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 120 100% 50%;
-    --primary-foreground: 220 13% 5%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 220 14% 14%;
-    --secondary-foreground: 210 14% 83%;
+    --secondary: 0 0% 9%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 14%;
-    --muted-foreground: 215 14% 55%;
+    --muted: 0 0% 9%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 120 100% 50%;
-    --accent-foreground: 220 13% 5%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 14% 20%;
-    --input: 215 14% 20%;
-    --ring: 120 100% 50%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    /* Custom terminal colors */
-    --terminal-green: 120 100% 50%;
-    --terminal-blue: 212 100% 67%;
-    --github-dark: 220 13% 5%;
-    --github-card: 220 14% 10%;
-    --github-border: 215 14% 20%;
-    --github-text: 210 14% 83%;
-    --github-muted: 215 14% 55%;
+    /* Custom colors */
+    --github-dark: 0 0% 0%;
+    --github-card: 0 0% 4%;
+    --github-border: 0 0% 15%;
+    --github-text: 0 0% 90%;
+    --github-muted: 0 0% 60%;
 
-    /* Language colors */
+    /* Standardized language colors (can keep mostly as is for icons, but toned down) */
     --lang-javascript: 53 93% 54%;
     --lang-typescript: 211 60% 48%;
     --lang-python: 207 51% 44%;
@@ -55,36 +54,36 @@
     --lang-html: 12 77% 52%;
     --lang-css: 264 77% 52%;
 
-    --sidebar-background: 220 14% 10%;
-    --sidebar-foreground: 210 14% 83%;
-    --sidebar-primary: 120 100% 50%;
-    --sidebar-primary-foreground: 220 13% 5%;
-    --sidebar-accent: 220 14% 14%;
-    --sidebar-accent-foreground: 210 14% 83%;
-    --sidebar-border: 215 14% 20%;
-    --sidebar-ring: 120 100% 50%;
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 9%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 0 0% 100%;
   }
 
   .dark {
-    --background: 220 13% 5%;
-    --foreground: 210 14% 83%;
-    --card: 220 14% 10%;
-    --card-foreground: 210 14% 83%;
-    --popover: 220 14% 10%;
-    --popover-foreground: 210 14% 83%;
-    --primary: 120 100% 50%;
-    --primary-foreground: 220 13% 5%;
-    --secondary: 220 14% 14%;
-    --secondary-foreground: 210 14% 83%;
-    --muted: 220 14% 14%;
-    --muted-foreground: 215 14% 55%;
-    --accent: 120 100% 50%;
-    --accent-foreground: 220 13% 5%;
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 3%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 3%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 9%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 9%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 215 14% 20%;
-    --input: 215 14% 20%;
-    --ring: 120 100% 50%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 0 0% 100%;
   }
 }
 
@@ -99,16 +98,25 @@
     }
   }
 
-  body, button, input, textarea, select {
-    font-family: 'JetBrains Mono', monospace !important;
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: 'Inter' !important;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased selection:bg-white selection:text-black;
   }
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply tracking-tight font-medium;
   }
 
   html {
@@ -118,73 +126,52 @@
 }
 
 @layer components {
-  .terminal-glow {
-    text-shadow: 0 0 4px hsl(var(--primary) / 0.4), 0 0 8px hsl(var(--primary) / 0.15);
-  }
-
-  .terminal-box-glow {
-    box-shadow: 0 0 10px hsl(var(--primary) / 0.3), 0 0 20px hsl(var(--primary) / 0.1), inset 0 0 20px hsl(var(--primary) / 0.05);
-  }
-
   .github-card {
-    @apply bg-card border border-border rounded-md p-4 transition-all duration-300;
+    @apply bg-card border border-border rounded-xl p-5 transition-all duration-300;
   }
 
   .github-card:hover {
-    @apply border-primary/50;
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.1);
-  }
-
-  .neon-border {
-    @apply border border-primary/30;
-  }
-
-  .neon-text {
-    @apply text-primary terminal-glow;
+    @apply border-white/30 bg-white/[0.02];
   }
 
   .code-block {
-    @apply bg-secondary/50 border border-border rounded-md p-4 font-mono text-sm;
+    @apply bg-secondary/30 border border-border rounded-md p-4 font-mono text-sm;
+  }
+
+  /* Reusable site title style for large headings (LAKSHYA, About, Projects, Skills) */
+  .site-title {
+    font-family: Impact !important;
+    font-weight: 900 !important;
+    text-transform: uppercase;
+    color: #f4f4f4 !important;
+    letter-spacing: 0px !important;
+    line-height: 0.9 !important;
+    display: block;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    /* Responsive size similar to hero variable */
+    font-size: clamp(56px, 9.5vw, 200px) !important;
   }
 
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground border border-border;
-  }
-
-  .grid-background {
-    background-image:
-      linear-gradient(hsl(var(--border) / 0.3) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--border) / 0.3) 1px, transparent 1px);
-    background-size: 50px 50px;
-  }
-
-  .scanline {
-    background: linear-gradient(to bottom,
-        transparent 50%,
-        hsl(var(--primary) / 0.03) 50%);
-    background-size: 100% 4px;
-    pointer-events: none;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-white/5 text-white/80 border border-white/10 hover:bg-white/10 transition-colors;
   }
 }
 
 @layer utilities {
   .font-mono {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'JetBrains Mono' !important;
   }
 
   .font-sans {
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+    font-family: 'Inter' !important;
   }
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  display: none;
 }
 
 ::-webkit-scrollbar-track {
@@ -197,110 +184,12 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--primary) / 0.5);
+  background: hsl(var(--muted-foreground));
 }
 
-/* Blinking cursor animation */
-@keyframes blink {
-
-  0%,
-  50% {
-    opacity: 1;
+@media (max-width: 768px) {
+  .keyboard-scale {
+    transform: scale(0.75) !important;
+    transform-origin: center top !important;
   }
-
-  51%,
-  100% {
-    opacity: 0;
-  }
-}
-
-.cursor-blink {
-  animation: blink 1s infinite;
-}
-
-/* Typewriter cursor */
-@keyframes typewriter-cursor {
-
-  0%,
-  100% {
-    border-color: hsl(var(--primary));
-  }
-
-  50% {
-    border-color: transparent;
-  }
-}
-
-.typewriter-cursor::after {
-  content: '|';
-  animation: blink 0.8s infinite;
-  color: hsl(var(--primary));
-}
-
-/* Glitch effect */
-@keyframes glitch {
-
-  0%,
-  90%,
-  100% {
-    transform: translate(0);
-  }
-
-  92% {
-    transform: translate(-2px, 1px);
-  }
-
-  94% {
-    transform: translate(2px, -1px);
-  }
-
-  96% {
-    transform: translate(-1px, 2px);
-  }
-
-  98% {
-    transform: translate(1px, -2px);
-  }
-}
-
-.glitch:hover {
-  animation: glitch 0.3s ease-in-out;
-}
-/* System Scanning Line Animation */
-@keyframes scanline {
-  0% { transform: translateY(-100%); opacity: 0; }
-  10% { opacity: 0.5; }
-  90% { opacity: 0.5; }
-  100% { transform: translateY(100vh); opacity: 0; }
-}
-
-.scanline-effect {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(34, 197, 94, 0.4) 50%, 
-    transparent 100%
-  );
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
-  z-index: 10;
-  pointer-events: none;
-  animation: scanline 8s linear infinite;
-}
-
-@keyframes pulse-ring {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(3); opacity: 0; }
-}
-
-.pulse-ring {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  animation: pulse-ring 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
 }

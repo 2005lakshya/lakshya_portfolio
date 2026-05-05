@@ -1,163 +1,139 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Terminal } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
+import { Home, User, Code2, FolderDot, Briefcase, Mail, Award, Menu, X } from "lucide-react";
 
 const navItems = [
-  { label: "home", href: "#home", prefix: "~/" },
-  { label: "about", href: "#about", prefix: "cat" },
-  { label: "skills", href: "#skills", prefix: "ls" },
-  { label: "projects", href: "#projects", prefix: "git" },
-  { label: "experience", href: "#experience", prefix: "cd" },
-  { label: "contact", href: "#contact", prefix: "ping" },
+  { label: "Home", href: "#home", icon: Home },
+  { label: "About", href: "#about", icon: User },
+  { label: "Skills", href: "#skills", icon: Code2 },
+  { label: "Projects", href: "#projects", icon: FolderDot },
+  { label: "Experience", href: "#experience", icon: Briefcase },
+  { label: "Achievements", href: "#achievements", icon: Award },
+  { label: "Contact", href: "#contact", icon: Mail },
 ];
 
+function DockItem({ item, mouseX }: { item: typeof navItems[0]; mouseX: any }) {
+  const ref = useRef<HTMLAnchorElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const distance = useTransform(mouseX, (val: number) => {
+    const bounds = ref.current?.getBoundingClientRect() ?? { x: 0, width: 0 };
+    return val - bounds.x - bounds.width / 2;
+  });
+
+  const widthSync = useTransform(distance, [-150, 0, 150], [36, 68, 36]);
+  const width = useSpring(widthSync, { mass: 0.1, stiffness: 150, damping: 12 });
+  const Icon = item.icon;
+
+  return (
+    <div className="relative flex flex-col items-center group">
+      <AnimatePresence>
+        {isHovered && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            animate={{ opacity: 1, y: -45, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.8 }}
+            className="absolute px-3 py-1.5 rounded-md bg-white text-black text-xs font-semibold whitespace-nowrap shadow-xl pointer-events-none z-50"
+          >
+            {item.label}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <motion.a
+        ref={ref}
+        href={item.href}
+        style={{ width, height: width }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        className="flex items-center justify-center rounded-full bg-white/10 border border-white/20 backdrop-blur-md hover:bg-white/20 transition-colors shadow-lg"
+      >
+        <Icon className="w-1/2 h-1/2 text-white/80 group-hover:text-white transition-colors" />
+      </motion.a>
+    </div>
+  );
+}
+
 const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
+  const mouseX = useMotionValue(Infinity);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("home");
-  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => {
+      if (mq.matches) document.body.classList.add("has-top-navbar");
+      else document.body.classList.remove("has-top-navbar");
     };
 
-    const options = {
-      root: null,
-      rootMargin: "-20% 0px -70% 0px",
-      threshold: 0,
-    };
+    update();
+    if (mq.addEventListener) mq.addEventListener("change", update);
+    else mq.addListener(update);
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
-        }
-      });
-    }, options);
-
-    navItems.forEach((item) => {
-      const el = document.querySelector(item.href);
-      if (el) observer.observe(el);
-    });
-
-    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      observer.disconnect();
+      if (mq.removeEventListener) mq.removeEventListener("change", update);
+      else mq.removeListener(update);
+      document.body.classList.remove("has-top-navbar");
     };
   }, []);
 
   return (
-    <motion.header
-      initial={{ y: -100, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="fixed top-6 left-0 right-0 z-50 flex justify-center pointer-events-none px-4"
-    >
-      <div className="pointer-events-auto relative flex w-full justify-center">
-        <nav
-          className={`transition-all duration-700 ease-in-out px-2 py-1.5 rounded-full border border-green-500/10 backdrop-blur-md shadow-2xl flex items-center justify-between gap-4 sm:gap-8 ${isScrolled
-              ? "bg-black/20 border-green-500/20 shadow-green-500/5 scale-95"
-              : "bg-white/5 border-green-500/5 shadow-transparent scale-100"
-            }`}
+    <>
+      <motion.header
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="fixed bottom-4 left-0 right-0 z-[70] hidden md:flex justify-center pointer-events-none px-4"
+      >
+        <div
+          className="pointer-events-auto flex items-end gap-2.5 px-3.5 pb-2.5 pt-3 rounded-3xl bg-black/35 border border-white/10 backdrop-blur-xl shadow-2xl"
+          onMouseMove={(event) => mouseX.set(event.pageX)}
+          onMouseLeave={() => mouseX.set(Infinity)}
         >
-          {/* Logo - Compact for Floating Nav */}
-          <a 
-            href="#home" 
-            className="flex items-center gap-2 group px-2 py-1 rounded-full hover:bg-green-500/5 transition-colors"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <div className="w-8 h-8 rounded-full bg-green-400/10 flex items-center justify-center group-hover:bg-green-500/20 transition-all border border-green-500/20 group-hover:border-green-500/40">
-              <Terminal className="w-4 h-4 text-green-400 group-hover:text-green-300" />
-            </div>
-            <span className="hidden sm:inline font-mono text-[13px] font-bold tracking-tight">
-              <span className="text-green-400/80">$</span>
-              <span className="text-foreground/90 ml-1 group-hover:text-foreground transition-colors">lakshya</span>
-            </span>
-          </a>
+          {navItems.map((item) => (
+            <DockItem key={item.label} item={item} mouseX={mouseX} />
+          ))}
+        </div>
+      </motion.header>
 
-          {/* Desktop navigation */}
-          <div className="hidden md:flex items-center gap-0.5 bg-green-500/5 p-0.5 rounded-full border border-green-500/10">
-            {navItems.map((item) => {
-              const isHovered = hoveredSection === item.label;
-              const isActive = activeSection === item.label;
-              const showPill = isHovered || (isActive && !hoveredSection);
-
-              return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  onMouseEnter={() => setHoveredSection(item.label)}
-                  onMouseLeave={() => setHoveredSection(null)}
-                  className={`px-4 py-2 text-[12px] transition-all font-mono rounded-full relative group whitespace-nowrap uppercase tracking-wider ${
-                    isActive || isHovered ? "text-green-300" : "text-muted-foreground/80"
-                  }`}
-                >
-                  <span className="relative z-10">{item.label}</span>
-                  {showPill && (
-                    <motion.div
-                      className="absolute inset-0 bg-green-400/10 rounded-full"
-                      layoutId="nav-pill"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    />
-                  )}
-                </a>
-              );
-            })}
-          </div>
-
-          {/* Mobile menu button */}
+      <header className="fixed top-4 left-0 right-0 z-50 md:hidden px-4 flex justify-end items-center pointer-events-none">
+        <div className="pointer-events-auto backdrop-blur-xl bg-black/60 border border-white/10 rounded-full p-2 shadow-xl">
           <button
-            type="button"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden w-9 h-9 flex items-center justify-center text-green-400/70 hover:text-green-300 hover:bg-green-500/10 transition-all rounded-full cursor-pointer border border-green-500/10 active:scale-90"
+            className="p-2 text-white/80 hover:text-white transition-colors"
           >
-            {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-        </nav>
+        </div>
 
-        {/* Mobile menu */}
         <AnimatePresence>
           {isMobileMenuOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/40 backdrop-blur-sm md:hidden"
-                onClick={() => setIsMobileMenuOpen(false)}
-              />
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 12 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 12 }}
-                transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                className="absolute top-full mt-3 left-1/2 w-[min(90vw,24rem)] -translate-x-1/2 bg-black/60 backdrop-blur-3xl border border-green-500/10 rounded-2xl p-3 shadow-2xl md:hidden z-10"
-              >
-                <div className="flex flex-col gap-0.5">
-                  {navItems.map((item) => (
-                    <a
-                      key={item.label}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 text-foreground/80 hover:text-green-300 hover:bg-green-500/10 transition-all font-mono px-4 py-3 rounded-xl group"
-                    >
-                      <span className="text-green-400 text-sm group-hover:scale-110 transition-transform">$</span>
-                      <span className="text-[10px] text-green-500/40 uppercase tracking-widest">{item.prefix}</span>
-                      <span className="text-sm font-medium tracking-wide uppercase italic">{item.label}</span>
-                    </a>
-                  ))}
-                </div>
-              </motion.div>
-
-            </>
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              className="absolute top-16 left-4 right-4 pointer-events-auto bg-black/90 backdrop-blur-2xl border border-white/10 rounded-2xl p-2 shadow-2xl flex flex-col"
+            >
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition-all"
+                  >
+                    <Icon size={20} />
+                    <span className="font-medium text-sm">{item.label}</span>
+                  </a>
+                );
+              })}
+            </motion.div>
           )}
         </AnimatePresence>
-      </div>
-    </motion.header>
+      </header>
+    </>
   );
 };
 
 export default Navbar;
-
