@@ -1,6 +1,6 @@
 export const profileData = {
   name: "Lakshya Gupta",
-  role: "Developer / Data Science",
+  role: "Developer / Data Scientist",
   tagline: "Building innovative solutions with code",
   email: "glakshya42@gmail.com",
   github: "2005lakshya",
@@ -14,13 +14,18 @@ export const profileData = {
 };
 
 export const aboutData = {
-  bio: `const lakshya = {
-  role: "Developer / Data Science",
-  interests: ["AppDev", "AI", "Web Dev"],
-  lookingFor: "Summer Internship",
-  education: "B.Tech Computer Science (Data Science0",
-  location: "India"
-}`,
+  terminalName: "lakshya@gupta",
+  whoami: "Lakshya Gupta — Developer / Data Scientist",
+  bio: `status: "Unemployed (but will make it sound cool)",
+role: "Developer / Data Scientist",
+interests: ["AppDev", "AI", "Web Dev"],
+lookingFor: "Summer Internship",
+location: "India",
+skills: "Turning coffee into code & bugs into features"`,
+  education: {
+    institution: "Vellore Institute of Technology, Vellore",
+    degree: "B.Tech in Computer Science (Data Science)"
+  },
   skills: [
     "React", "TypeScript", "Python", "Java", "Kotlin",
     "Flutter", "Node.js", "Machine Learning", "Data Science",
@@ -45,42 +50,48 @@ export const projectsData = [
     description: "Developed MessIT, a menu app with 40K+ downloads for VIT students on Android and iOS. Integrated a redesigned UI with backend data and local storage for offline access, while optimizing the menu loading process to reduce load times by 40% for a smoother experience.",
     techStack: ["Flutter", "Firebase", "Android", "iOS"],
     github: "",
-    demo: "https://play.google.com/store/apps/details?id=com.vinnovateit.messit&hl=en_IN",
+    href: "https://play.google.com/store/apps/details?id=com.vinnovateit.messit&hl=en_IN",
+    image: "/project/messit.png",
   },
   {
-    name: "RoboWars App",
+    name: "RoboWars",
     description: "Developed the Robowars app for graVITas VIT’s tech fest, building intuitive features for team listings, match scheduling, and real-time updates. Designed the UI to ensure efficient navigation of team profiles and schedules for all event participants.",
     techStack: ["React", "TypeScript", "TailwindCSS"],
     github: "http://github.com/2005lakshya/RoboVITics_Robowars_2025",
-    demo: "https://play.google.com/store/apps/details?id=robowars.com.robowars_app&pcampaignid=web_share",
+    href: "https://play.google.com/store/apps/details?id=robowars.com.robowars_app&pcampaignid=web_share",
+    image: "/project/robowars.png",
   },
   {
-    name: "HackXpertise 2.0",
+    name: "HackXpertise",
     description: "Built and deployed the HackXpertise 2.0 portal for participant registration, team formation, and event coordination. Successfully managed seamless onboarding and live management for over 200+ participants during the entire hackathon event.",
     techStack: ["React", "Node.js", "MongoDB"],
     github: "https://github.com/2005lakshya/HackXpertise",
-    demo: "https://hackxpertise20.vercel.app/",
+    href: "https://hackxpertise20.vercel.app/",
+    image: "/project/hackxpertise.png",
   },
   {
-    name: "Verimind AI",
+    name: "Verimind",
     description: "Developed Verimind AI, a 'Context Engine' unifying verification data into actionable risk scores. Built an ML pipeline for failure prediction and automated plan generation, while prioritizing coverage through RTL cross-referencing. Used TF-IDF similarity to group failures, drastically reducing debug time by identifying core root causes.",
     techStack: ["Python", "Machine Learning", "AI"],
     github: "https://github.com/2005lakshya/verimind-ai",
-    demo: "",
+    href: "",
+    image: "/project/verimind.png",
   },
   {
     name: "Plant Care",
     description: "Flask app that detects plant diseases from leaf images using MobileNetV2 and Gemini AI for treatment recommendations.",
     techStack: ["Python", "Flask", "TensorFlow", "Gemini AI"],
     github: "https://github.com/2005lakshya/PlantCare",
-    demo: "",
+    href: "",
+    image: "/project/plantcare.png",
   },
   {
     name: "BunkBuddies",
     description: "Developed BunkBuddies, a room counseling and roommate-finding platform for VIT students. Scaled the system to handle 2.8K active users and 3.4K group requests, streamlining the complex room selection process through integrated messaging and real-time group formation tools.",
     techStack: ["React", "TypeScript", "Firebase", "TailwindCSS"],
     github: "https://github.com/2005lakshya/BunkBuddies-Frontend",
-    demo: "https://bunkbuddies.vinnovateit.com/",
+    href: "https://bunkbuddies.vinnovateit.com/",
+    image: "/project/bunkbuddies.png",
   },
 ];
 
@@ -94,7 +105,6 @@ function generateContributions() {
   for (let w = 0; w < weeks; w++) {
     const week: number[] = [];
     for (let d = 0; d < days; d++) {
-      // Generate realistic-looking contribution pattern
       const random = Math.random();
       if (random < 0.3) week.push(0);
       else if (random < 0.5) week.push(1);
@@ -109,18 +119,28 @@ function generateContributions() {
 
 export const experienceData = [
   {
-    hash: "8e2a1b4",
-    title: "Secretary @ IEEE TEMS, VIT",
-    date: "December 2025 - Present",
+    hash: "ntt-data-2026",
+    title: "NTT DATA",
+    role: "Upcoming Summer Intern",
+    date: "May 2026",
+    description: "",
     type: "feat",
-    description: "Led a 100+ member chapter, overseeing multiple technical initiatives and driving a 20% increase in engagement through a mentorship program. Coordinated cross-team efforts and helped organize CodeRush 3.0 and HackXpertise 2.0 at graVITas’25, attracting 250+ participants.",
   },
   {
-    hash: "7b2d4e9",
-    title: "Summer Intern @ Havells India Limited",
-    date: "May 2025 - July 2025",
+    hash: "ieee-tems-2026",
+    title: "IEEE-TEMS",
+    role: "Secretary",
+    date: "January 2026 - Present",
+    description: "Led a 100+ member chapter, overseeing multiple technical initiatives and driving a 20% increase in engagement through a mentorship program. Coordinated cross-team efforts and helped organize CodeRush 3.0 and HackXpertise 2.0 at graVITas’25, attracting 250+ participants.",
     type: "feat",
+  },
+  {
+    hash: "havells-2025",
+    title: "Havells India Limited",
+    role: "Summer Intern",
+    date: "May 2025 - July 2025",
     description: "Developed a Student Data Management System using ASP.NET MVC (C#) and PostgreSQL. Built secure authentication with role-based access. Completed independently with weekly mentor reviews.",
+    type: "feat",
   },
 ];
 

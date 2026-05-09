@@ -1,121 +1,266 @@
-import { motion } from "framer-motion";
-import { Briefcase, Calendar, ChevronRight, Activity, Cpu } from "lucide-react";
-import { experienceData } from "@/data/portfolio";
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { experienceData } from '../data/portfolio';
+import styles from './Experience.module.css';
 
 const Experience = () => {
-  return (
-    <section id="experience" className="py-24 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-1/2 right-0 w-[600px] h-[600px] bg-primary/5 blur-[140px] rounded-full -z-10" />
+    const [scrollDir, setScrollDir] = useState<'down' | 'up'>('down');
+    const sectionRef = useRef<HTMLDivElement>(null);
+    const titleRef = useRef<HTMLDivElement>(null);
+    const itemsContainerRef = useRef<HTMLDivElement>(null);
+    const [scrollProgress, setScrollProgress] = useState(0);
 
-      <div className="container px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto"
-        >
-          {/* Section Header */}
-          <div className="flex flex-col items-center mb-10 text-center">
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[9px] font-mono tracking-[0.15em] uppercase mb-3"
+    const { scrollYProgress: sectionScrollProgress } = useScroll({
+        target: sectionRef,
+        offset: ["start center", "end center"],
+    });
+
+    useMotionValueEvent(sectionScrollProgress, "change", (latest) => {
+        setScrollProgress(latest);
+    });
+
+    useEffect(() => {
+        let lastScrollY = window.pageYOffset;
+        const updateScrollDir = () => {
+            const scrollY = window.pageYOffset;
+            setScrollDir(scrollY > lastScrollY ? 'down' : 'up');
+            lastScrollY = scrollY > 0 ? scrollY : 0;
+        };
+        window.addEventListener('scroll', updateScrollDir);
+        return () => window.removeEventListener('scroll', updateScrollDir);
+    }, []);
+
+    // Variants for consistent animations - refined for smoother center-oriented motion
+    const leftSlideVariants = {
+        hidden: { opacity: 0, x: -80, y: 100 },
+        visible: { 
+            opacity: 1, 
+            x: 0, 
+            y: 0,
+            transition: { duration: 1.2 }
+        }
+    };
+
+    const rightSlideVariants = {
+        hidden: { opacity: 0, x: 80, y: 100 },
+        visible: { 
+            opacity: 1, 
+            x: 0, 
+            y: 0,
+            transition: { duration: 1.2 }
+        }
+    };
+
+    const nestedVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.8 }
+        }
+    };
+
+    // Calculate scroll-based animation values for left items (come from bottom-left)
+    const getLeftItemAnimation = (itemIndex: number) => {
+        const itemOffset = itemIndex * 0.25;
+        const progress = Math.max(0, Math.min(1, (scrollProgress - itemOffset) / 0.25));
+        const isScrollingDown = scrollDir === 'down';
+        
+        if (!isScrollingDown) {
+            return { x: 0, y: 0, opacity: 1 };
+        }
+        
+        const x = -80 * (1 - progress);
+        const y = 100 * (1 - progress);
+        const opacity = progress;
+        
+        return { x, y, opacity };
+    };
+
+    // Calculate scroll-based animation values for right items (come from bottom-right)
+    const getRightItemAnimation = (itemIndex: number) => {
+        const itemOffset = itemIndex * 0.25;
+        const progress = Math.max(0, Math.min(1, (scrollProgress - itemOffset) / 0.25));
+        const isScrollingDown = scrollDir === 'down';
+        
+        if (!isScrollingDown) {
+            return { x: 0, y: 0, opacity: 1 };
+        }
+        
+        const x = 80 * (1 - progress);
+        const y = 100 * (1 - progress);
+        const opacity = progress;
+        
+        return { x, y, opacity };
+    };
+
+    // Extract data from portfolio.ts with more robust case-insensitive search
+    const nttData = experienceData.find(e => e.title.toUpperCase().includes("NTT")) || experienceData[0];
+    const ieeeData = experienceData.find(e => e.title.toUpperCase().includes("IEEE")) || experienceData[1];
+    const havellsData = experienceData.find(e => e.title.toUpperCase().includes("HAVELLS")) || experienceData[2];
+
+    // If scrolling up, we bypass the hidden state to keep items at their position
+    const isScrollingUp = scrollDir === 'up';
+
+    useEffect(() => {
+        gsap.registerPlugin(ScrollTrigger);
+
+        // animate title on load
+        if (titleRef.current) {
+            gsap.fromTo(
+                titleRef.current,
+                { opacity: 0, y: 50 },
+                { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
+            );
+        }
+
+        const container = itemsContainerRef.current || sectionRef.current;
+        const createdTriggers: any[] = [];
+        if (container) {
+            const cards = container.querySelectorAll('.exp-card');
+            cards.forEach((card: Element, index: number) => {
+                const isEven = index % 2 === 0;
+
+                const anim = gsap.fromTo(
+                    card,
+                    { opacity: 0, x: isEven ? -100 : 100, y: 50 },
+                    {
+                        opacity: 1,
+                        x: 0,
+                        y: 0,
+                        duration: 0.8,
+                        ease: 'power2.out',
+                        scrollTrigger: {
+                            trigger: card,
+                            start: 'top 80%',
+                            end: 'bottom 20%',
+                            toggleActions: 'play none none reverse',
+                        },
+                    }
+                );
+                if (anim && anim.scrollTrigger) createdTriggers.push(anim.scrollTrigger);
+
+                const contentEls = card.querySelectorAll('.content-element');
+                const animContent = gsap.fromTo(
+                    contentEls,
+                    { opacity: 0, y: 30 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.6,
+                        stagger: 0.1,
+                        delay: 0.2,
+                        ease: 'power2.out',
+                        scrollTrigger: {
+                            trigger: card,
+                            start: 'top 80%',
+                            end: 'bottom 20%',
+                            toggleActions: 'play none none reverse',
+                        },
+                    }
+                );
+                if (animContent && animContent.scrollTrigger)
+                    createdTriggers.push(animContent.scrollTrigger);
+            });
+        }
+
+        return () => {
+            createdTriggers.forEach((t) => t && t.kill && t.kill());
+        };
+    }, []);
+
+    return (
+        <div id="experience" className={styles.experience} ref={(el) => { sectionRef.current = el; itemsContainerRef.current = el; }}>
+            <motion.div 
+                ref={titleRef}
+                className={`exp-title ${styles.experience2}`}
+                initial={isScrollingUp ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: false }}
+                transition={{ duration: 0.8 }}
             >
-              <motion.div
-                animate={{ 
-                  scale: [1, 1.4, 1],
-                  rotate: [0, 15, -30, 15, 0],
-                  filter: ["brightness(1)", "brightness(2)", "brightness(1)"]
-                }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Activity size={12} />
-              </motion.div>
-              <span className="font-bold tracking-widest">HISTORY_LOG_SCAN</span>
+                EXPERIENCE
             </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">Experience <span className="text-primary italic font-serif">.log</span></h2>
-          </div>
 
-          {/* Unified Window Frame */}
-          <div className="relative rounded-[1.5rem] bg-white/[0.02] backdrop-blur-2xl border border-white/5 shadow-2xl overflow-hidden group">
-            {/* Window Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/[0.01]">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#FF5F56] shadow-[0_0_10px_rgba(255,95,86,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#FFBD2E] shadow-[0_0_10px_rgba(255,189,46,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#27C93F] shadow-[0_0_10px_rgba(39,201,63,0.2)]" />
+            {/* Entry 1 (NTT DATA) */}
+            <div className={`exp-card ${styles.experienceItem2}`}>
+                <div className={styles.container5}>
+                    <div className={styles.container6}>
+                        <b className={styles.text}>.01</b>
+                    </div>
+                    <img
+                        src="/nttdata.png"
+                        alt="NTT DATA"
+                        className={`content-element ${styles.companyLogo}`}
+                    />
                 </div>
-                <div className="ml-4 flex items-center gap-3 text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.2em]">
-                  <span className="w-1 h-1 rounded-full bg-primary/20" />
-                  <span>Timeline — experience@dev</span>
+                <div className={styles.verticalborder2}>
+                    <div className={styles.container4}>
+                        <div className={`content-element ${styles.may2025}`}>{nttData.date}</div>
+                    </div>
+                    <div className={styles.heading4}>
+                        <b className={`content-element ${styles.summerIntern}`}>{nttData.role}</b>
+                    </div>
+                    <div className={styles.backgroundborder2} />
                 </div>
-              </div>
-              <Cpu size={14} className="text-primary/30" />
             </div>
 
-            <div className="p-6 md:p-10 bg-transparent">
-              <div className="relative space-y-12">
-                {/* Vertical line connector */}
-                <div className="absolute left-[11px] md:left-[15px] top-2 bottom-2 w-[1px] bg-gradient-to-b from-primary/30 via-primary/5 to-transparent shadow-[0_0_8px_rgba(34,197,94,0.1)]" />
-
-                {experienceData.map((item, index) => {
-                  const [role, company] = item.title.split(" @ ");
-                  return (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.5, delay: index * 0.1 }}
-                      viewport={{ once: true }}
-                      className="group/item relative flex items-start pl-8 md:pl-12"
-                    >
-                      {/* Timeline dot */}
-                      <div className="absolute left-0 top-1.5 w-[23px] h-[23px] md:w-[31px] md:h-[31px] rounded-full bg-black/60 border border-white/20 flex items-center justify-center p-1 group-hover/item:border-primary/50 group-hover/item:shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all z-10">
-                        <div className="pulse-ring" />
-                        <div className="w-full h-full rounded-full bg-primary/5 group-hover/item:bg-primary/20 transition-all flex items-center justify-center text-primary/40 group-hover/item:text-primary">
-                          <ChevronRight size={12} />
-                        </div>
-                      </div>
-
-                      <div className="flex-1 space-y-4">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                          <div className="space-y-1">
-                            <h3 className="text-lg md:text-xl font-bold tracking-tight text-white group-hover/item:text-primary transition-colors">{role}</h3>
-                            <p className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/5 text-[9px] font-mono font-black text-primary/60 uppercase tracking-widest">
-                              <Briefcase size={10} />
-                              {company || "Freelance / Projects"}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10 text-[10px] font-mono font-bold text-primary tracking-tight">
-                            <Calendar size={13} className="text-primary/60" />
-                            {item.date}
-                          </div>
-                        </div>
-
-                        <div className="bg-white/[0.02] border border-white/5 rounded-[1.25rem] p-5 group-hover/item:bg-white/[0.04] group-hover/item:border-primary/10 transition-all shadow-inner">
-                          <div className="flex items-center gap-2 mb-3">
-                             <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
-                             <span className="text-[8px] font-mono text-primary/30 uppercase tracking-[0.2em]">Node_{item.hash || "8e2a1b4"}</span>
-                          </div>
-                          <p className="text-[12px] font-mono text-gray-300 leading-relaxed max-w-2xl italic">
-                            <span className="text-primary/30 mr-2 opacity-50 font-black">λ</span>
-                            {item.description}
-                          </p>
-                        </div>
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
+            {/* Entry 2 (IEEE-TEMS) */}
+            <div 
+                className={`exp-card ${styles.experienceItem23}`}>
+                <div className={styles.verticalborder5}>
+                    <div className={styles.container22}>
+                        <div className={`content-element ${styles.january2026}`}>{ieeeData.date}</div>
+                    </div>
+                    <div className={styles.heading45}>
+                        <b className={`content-element ${styles.secretary}`}>{ieeeData.role}</b>
+                    </div>
+                    <div className={styles.overlayborder5}>
+                        <div 
+                            className={`content-element ${styles.spearheadedTheDevelopment}`} 
+                            dangerouslySetInnerHTML={{ __html: ieeeData.description }} 
+                        />
+                    </div>
+                    <div className={styles.backgroundborder9} />
+                </div>
+                <div className={styles.container23}>
+                    <div className={styles.container24}>
+                        <b className={styles.text}>.02</b>
+                    </div>
+                    <img
+                        src="/ieeetems.png"
+                        alt="IEEE-TEMS"
+                        className={`content-element ${styles.companyLogo}`}
+                    />
+                </div>
             </div>
-          </div>
-        </motion.div>
-      </div>
-    </section>
-  );
+
+            {/* Entry 3 (Havells) */}
+            <div className={`exp-card ${styles.experienceItem1}`}>
+                <div className={styles.container}>
+                    <img
+                        src="/havells.png"
+                        alt="Havells India Limited"
+                        className={`content-element ${styles.companyLogo}`}
+                    />
+                </div>
+                <div className={styles.verticalborder}>
+                    <div className={styles.container4}>
+                        <div className={`content-element ${styles.may2025}`}>{havellsData.date}</div>
+                    </div>
+                    <div className={styles.heading4}>
+                        <b className={`content-element ${styles.summerIntern}`}>{havellsData.role}</b>
+                    </div>
+                    <div className={styles.overlayborder}>
+                        <div className={`content-element ${styles.developedAStudent}`}>{havellsData.description}</div>
+                    </div>
+                    <div className={styles.backgroundborder2} />
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default Experience;

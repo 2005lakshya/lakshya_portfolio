@@ -1,0 +1,345 @@
+.createProfile {
+	width: 100%;
+	min-height: auto;
+	position: relative;
+	background-color: #000;
+	overflow: visible;
+	text-align: center;
+	/* center headings */
+	font-size: 96px;
+	color: #f4f4f4;
+	font-family: Impact;
+	padding-top: 80px;
+	/* balanced padding */
+}
+
+.aboutMe {
+	position: relative;
+	top: 0;
+	margin: 0 auto 60px;
+	/* balanced margin */
+	letter-spacing: -2.56px;
+	line-height: 70px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* center text inside the heading box */
+	width: 100%;
+	max-width: 625px;
+}
+
+.container {
+	position: relative;
+	top: auto;
+	left: auto;
+	transform: none;
+	margin-top: 30px !important;
+	margin-left: auto;
+	margin-right: auto;
+	margin-bottom: 0;
+	width: 760px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/* center inner content */
+	max-width: 760px;
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.4);
+	font-family: 'JetBrains Mono';
+}
+
+.overlaybordershadowoverlayb {
+	align-self: stretch;
+	box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.25);
+	backdrop-filter: blur(40px);
+	border-radius: 12px;
+	background-color: rgba(255, 255, 255, 0.03);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	/* center inner bar */
+}
+
+.backgroundhorizontalborder {
+	align-self: stretch;
+	background-color: #2a2a2a;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	/* center terminal content */
+	padding: 12px 16px;
+	gap: 20px;
+	position: relative;
+	/* for absolutely positioned children */
+	width: 100%;
+	max-width: 760px;
+	/* constrain width and center within overlay */
+	margin: 0 auto;
+}
+
+.container2 {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	position: absolute;
+	/* keep control dots on the left */
+	left: 16px;
+	z-index: 2;
+}
+
+.background {
+	height: 12px;
+	width: 12px;
+	position: relative;
+	border-radius: 9999px;
+	background-color: #ff5f56;
+}
+
+.background2 {
+	height: 12px;
+	width: 12px;
+	position: relative;
+	border-radius: 9999px;
+	background-color: #ffbd2e;
+}
+
+.background3 {
+	height: 12px;
+	width: 12px;
+	position: relative;
+	border-radius: 9999px;
+	background-color: #27c93f;
+}
+
+.container3 {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	position: relative;
+	/* center within parent via flex */
+	left: auto;
+	transform: none;
+	width: 100%;
+	justify-content: center;
+}
+
+.text {
+	width: 100%;
+	max-width: 640px;
+	height: auto;
+	position: relative;
+	line-height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+}
+
+.container4 {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 32px 32px 40px;
+	box-sizing: border-box;
+	gap: 2rem;
+	min-height: 400px;
+	font-size: 14px;
+	color: rgba(255, 255, 255, 0.6);
+}
+
+.commandBlock {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+}
+
+.container5 {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	color: #4ade80;
+}
+
+.stitchContainer {
+	align-self: stretch;
+	position: relative;
+}
+
+.stitch {
+	line-height: 22.75px;
+}
+
+.span {
+	color: #e5e2e1;
+}
+
+.whoami {
+	color: #fff;
+}
+
+.container6 {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 24px;
+	color: #a5b4fc;
+}
+
+.fullStackEngineerWith {
+	align-self: stretch;
+	position: relative;
+	line-height: 22.75px;
+}
+
+.container9 {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	padding: 0.7px 0px 0px;
+	gap: 24px;
+}
+
+.list {
+	width: 814px;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.item {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.container11 {
+	align-self: stretch;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	padding: 0.7px 0px 0px;
+	gap: 24px;
+}
+
+.container13 {
+	align-self: stretch;
+	height: 22.8px;
+	position: relative;
+	color: #4ade80;
+	display: flex;
+	align-items: center;
+}
+
+.text2 {
+	position: relative;
+	top: -0.5px;
+	left: 0px;
+	display: flex;
+	align-items: center;
+	width: auto;
+	height: 23px;
+}
+
+.textTxt {
+	width: auto;
+}
+
+.background4 {
+	position: relative;
+	top: 0px;
+	left: 4px;
+	background-color: #fff;
+	width: 8px;
+	height: 18px;
+}
+
+
+body {
+	margin: 0;
+	line-height: normal;
+}
+
+/* Responsive fixes: make About flow and center on narrow viewports */
+@media (max-width: 900px) {
+	.createProfile {
+		height: auto;
+		/* allow content to size naturally */
+		padding: 40px 16px 60px;
+	}
+
+	.aboutMe {
+		position: relative;
+		top: 0;
+		margin-bottom: 24px;
+		width: 100%;
+		transform: none;
+		left: auto;
+	}
+
+	.container {
+		position: relative;
+		top: auto;
+		left: auto;
+		transform: none;
+		width: calc(100% - 32px);
+		max-width: 760px;
+		margin: 0 auto;
+		padding-top: 0;
+	}
+
+	.backgroundhorizontalborder {
+		justify-content: center;
+		padding: 12px 12px;
+	}
+
+	.container2 {
+		position: relative;
+		left: auto;
+		margin-right: 8px;
+	}
+
+	.container3 {
+		position: static;
+		left: auto;
+		transform: none;
+		display: flex;
+		justify-content: center;
+		width: 100%;
+	}
+}
+@media (max-width: 600px) {
+	.aboutMe {
+		font-size: 48px;
+		line-height: 1;
+		margin-bottom: 32px;
+	}
+
+	.container {
+		width: 100%;
+		max-width: 100%;
+		padding: 0 8px;
+	}
+
+	.container4 {
+		padding: 16px;
+		min-height: auto;
+	}
+
+	.commandBlock {
+		gap: 2px;
+	}
+
+	.fullStackEngineerWith {
+		font-size: 13px;
+	}
+}
