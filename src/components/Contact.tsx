@@ -41,7 +41,7 @@ const Contact = () => {
 
     setErrorMsg(null);
     setIsSubmitting(true);
-    const accessKey = import.meta.env.WEB3FORMS_ACCESS_KEY || "";
+    const accessKey = import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "";
     if (!accessKey) {
       const msg = "Missing WEB3FORMS_ACCESS_KEY in environment. Add it to .env and restart the dev server.";
       console.warn(msg);
@@ -50,7 +50,7 @@ const Contact = () => {
       return;
     }
     const formData = new FormData(event.currentTarget);
-    formData.append("access_key", import.meta.env.WEB3FORMS_ACCESS_KEY || "");
+    formData.append("access_key", import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "");
 
     try {
       const response = await fetch("https://api.web3forms.com/submit", {
