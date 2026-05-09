@@ -36,7 +36,7 @@ export default function TechKeyboard() {
   return (
     <section
       id="skills"
-      className="relative xl:min-h-screen flex flex-col items-center justify-start pt-0 xl:pt-32 pb-16 xl:pb-0 overflow-visible xl:overflow-hidden select-none bg-black [overflow-anchor:none]"
+      className="relative xl:min-h-[70vh] flex flex-col items-center justify-start pt-0 xl:pt-32 pb-16 xl:pb-0 overflow-visible xl:overflow-hidden select-none bg-black [overflow-anchor:none]"
       style={{ backgroundColor: "#000000" }}
     >
 

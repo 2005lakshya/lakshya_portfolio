@@ -96,17 +96,79 @@
   font-size: var(--hero-name-size);
 }
 
-@media (min-width: 1400px) {
+@media (min-width: 1400px) and (max-width: 1999px) {
   .createProfile {
+    --hero-name-top: clamp(20px, 2vw, 32px);
     --hero-name-size: clamp(180px, 11vw, 240px);
-    --hero-box-top: clamp(112px, 14vh, 152px);
+    --hero-box-gap: clamp(40px, 3vw, 56px);
+    --hero-box-top-raw: calc(var(--hero-name-top) + var(--hero-name-size) + var(--hero-box-gap));
+    --hero-box-top: clamp(240px, var(--hero-box-top-raw), 328px);
+  }
+
+  .heroBottomSectionWithGrid {
+    right: 190px;
+    width: calc(100% - 190px);
+    height: calc(100% - var(--hero-box-top));
+    min-height: 280px;
+    border-radius: 0px 5000px 5000px 0px;
+  }
+
+  .lakshya {
+    width: min(64vw, 860px);
+  }
+
+  .lakshyaIcon {
+    left: 305px;
+    width: 300px;
+    height: 450px;
+  }
+
+  .sticker {
+    width: 160px;
+  }
+
+  .weatherTemp {
+    font-size: 28px;
+  }
+
+  .weatherMetaRow {
+    font-size: 28px;
+  }
+
+  .quoteContainer {
+    top: 340px;
   }
 }
 
 @media (min-width: 2000px) {
   .createProfile {
+    --hero-name-top: clamp(24px, 2vw, 40px);
     --hero-name-size: clamp(220px, 12vw, 280px);
-    --hero-box-top: clamp(124px, 14vh, 168px);
+    --hero-box-gap: clamp(48px, 3vw, 64px);
+    --hero-box-top-raw: calc(var(--hero-name-top) + var(--hero-name-size) + var(--hero-box-gap));
+    --hero-box-top: clamp(292px, var(--hero-box-top-raw), 384px);
+  }
+
+  .lakshyaIcon {
+    left: 500px;
+    width: 550px;
+    height: 750px;
+  }
+
+  .sticker {
+    width: 180px;
+  }
+
+  .weatherTemp {
+    font-size: 32px;
+  }
+
+  .weatherMetaRow {
+    font-size: 20px;
+  }
+
+  .quoteContainer {
+    top: 280px;
   }
 }
 
@@ -141,8 +203,6 @@
   top: 0px;
   transform: scale(1.306);
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Impact:ital,wght@0,400&display=swap');
 
 body {
   margin: 0;
@@ -444,7 +504,7 @@ body {
   }
 }
 
-@media (min-width: 1025px) and (max-width: 1440px) {
+@media (min-width: 1025px) and (max-width: 1399px) {
   .createProfile {
     --hero-name-size: clamp(72px, 7.1vw, 80px);
     --hero-box-top: clamp(96px, 11vh, 118px);

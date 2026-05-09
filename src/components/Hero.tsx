@@ -32,43 +32,11 @@ const Hero = () => {
 
     const generate = () => {
       const w = window.innerWidth;
-      const isLaptop = w >= 1025 && w <= 1440;
       const isMobile = w <= 768;
-
-      if (isLaptop) {
-        // Deterministic positions for laptop view (percentage-based)
-        const fixedLaptop: Record<string, { left: number; top: number; rotation: number; z: number }> = {
-          "404error.png": { left: 12, top: 42, rotation: 12, z: 18 },
-          "code.png": { left: 5, top: 6, rotation: 14, z: 20 },
-          "codeon.png": { left: 5, top: 75, rotation: -18, z: 16 },
-          "eatsleep.png": { left: 68, top: 20, rotation: 0, z: 17 },
-          "fullstack.png": { left: 50, top: 45, rotation: 8, z: 19 },
-          "justcodeit.png": { left: 60, top: 60, rotation: -8, z: 15 },
-          "ihate.png": { left: 40, top: 4, rotation: 8, z: 19 },
-          "coffee.png": { left: 80, top: 50, rotation: -8, z: 15 },
-        };
-
-        setStickerStyles(fixedLaptop);
-        return;
-      }
-
       const isTablet = w > 768 && w <= 1024;
-      if (isTablet) {
-        // Deterministic positions for tablet view
-        const fixedTablet: Record<string, { left: number; top: number; rotation: number; z: number }> = {
-          "404error.png": { left: 8, top: 5, rotation: -6, z: 18 },
-          "code.png": { left: 10, top: 25, rotation: 10, z: 20 },
-          "codeon.png": { left: 75, top: 40, rotation: -12, z: 16 },
-          "eatsleep.png": { left: 5, top: 70, rotation: 4, z: 17 },
-          "fullstack.png": { left: 40, top: 30, rotation: 8, z: 19 },
-          "justcodeit.png": { left: 70, top: 60, rotation: -6, z: 15 },
-          "ihate.png": { left: 55, top: 12, rotation: 10, z: 14 },
-          "coffee.png": { left: 10, top: 45, rotation: -10, z: 13 },
-        };
-
-        setStickerStyles(fixedTablet);
-        return;
-      }
+      const isSmallLaptop = w >= 1025 && w <= 1399;
+      const isLargeLaptop = w >= 1400 && w <= 1999;
+      const isXLScreen = w >= 2000;
 
       if (isMobile) {
         // Deterministic positions for mobile view (percentage-based inside stickersContainer)
@@ -87,7 +55,75 @@ const Hero = () => {
         return;
       }
 
-      // Default: don't absolutely position stickers for mid sizes
+      if (isTablet) {
+        // Deterministic positions for tablet view
+        const fixedTablet: Record<string, { left: number; top: number; rotation: number; z: number }> = {
+          "404error.png": { left: 8, top: 5, rotation: -6, z: 18 },
+          "code.png": { left: 10, top: 25, rotation: 10, z: 20 },
+          "codeon.png": { left: 75, top: 40, rotation: -12, z: 16 },
+          "eatsleep.png": { left: 5, top: 70, rotation: 4, z: 17 },
+          "fullstack.png": { left: 40, top: 30, rotation: 8, z: 19 },
+          "justcodeit.png": { left: 70, top: 60, rotation: -6, z: 15 },
+          "ihate.png": { left: 55, top: 12, rotation: 10, z: 14 },
+          "coffee.png": { left: 10, top: 45, rotation: -10, z: 13 },
+        };
+
+        setStickerStyles(fixedTablet);
+        return;
+      }
+
+      if (isSmallLaptop) {
+        // Deterministic positions for small laptop view (1025-1399px)
+        const fixedSmallLaptop: Record<string, { left: number; top: number; rotation: number; z: number }> = {
+          "404error.png": { left: 12, top: 42, rotation: 12, z: 18 },
+          "code.png": { left: 5, top: 6, rotation: 14, z: 20 },
+          "codeon.png": { left: 5, top: 75, rotation: -18, z: 16 },
+          "eatsleep.png": { left: 68, top: 20, rotation: 0, z: 17 },
+          "fullstack.png": { left: 50, top: 45, rotation: 8, z: 19 },
+          "justcodeit.png": { left: 60, top: 60, rotation: -8, z: 15 },
+          "ihate.png": { left: 40, top: 4, rotation: 8, z: 19 },
+          "coffee.png": { left: 80, top: 50, rotation: -8, z: 15 },
+        };
+
+        setStickerStyles(fixedSmallLaptop);
+        return;
+      }
+
+      if (isLargeLaptop) {
+        // Deterministic positions for large laptop view (1400-1999px)
+        const fixedLargeLaptop: Record<string, { left: number; top: number; rotation: number; z: number }> = {
+          "404error.png": { left: 10, top: 35, rotation: 12, z: 18 },
+          "code.png": { left: 3, top: 8, rotation: 14, z: 20 },
+          "codeon.png": { left: 4, top: 72, rotation: -18, z: 16 },
+          "eatsleep.png": { left: 70, top: 18, rotation: 0, z: 17 },
+          "fullstack.png": { left: 48, top: 42, rotation: 8, z: 19 },
+          "justcodeit.png": { left: 58, top: 58, rotation: -8, z: 15 },
+          "ihate.png": { left: 38, top: 5, rotation: 8, z: 19 },
+          "coffee.png": { left: 78, top: 48, rotation: -8, z: 15 },
+        };
+
+        setStickerStyles(fixedLargeLaptop);
+        return;
+      }
+
+      if (isXLScreen) {
+        // Deterministic positions for XL screen view (2000px+)
+        const fixedXLScreen: Record<string, { left: number; top: number; rotation: number; z: number }> = {
+          "404error.png": { left: 8, top: 32, rotation: 12, z: 18 },
+          "code.png": { left: 2, top: 10, rotation: 14, z: 20 },
+          "codeon.png": { left: 3, top: 70, rotation: -18, z: 16 },
+          "eatsleep.png": { left: 72, top: 16, rotation: 0, z: 17 },
+          "fullstack.png": { left: 46, top: 40, rotation: 8, z: 19 },
+          "justcodeit.png": { left: 56, top: 56, rotation: -8, z: 15 },
+          "ihate.png": { left: 36, top: 6, rotation: 8, z: 19 },
+          "coffee.png": { left: 76, top: 46, rotation: -8, z: 15 },
+        };
+
+        setStickerStyles(fixedXLScreen);
+        return;
+      }
+
+      // Default: shouldn't reach here but just in case
       setStickerStyles({});
     };
 
@@ -135,9 +171,14 @@ const Hero = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    const apiKey = "e90e94bed1d6e98959602bbbddbab40a";
+    const apiKey = import.meta.env.VITE_OPENWEATHER_API_KEY;
 
     const loadWeather = async () => {
+      if (!apiKey) {
+        setWeather({ temperature: 63 });
+        return;
+      }
+
       try {
         const response = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?q=Gurgaon,IN&appid=${apiKey}&units=metric`,

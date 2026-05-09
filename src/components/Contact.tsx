@@ -14,6 +14,7 @@ const terminalItems = [
 const Contact = () => {
   const [isSent, setIsSent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const packetStatus = isSent ? "PACKET_STATUS: TRANSMITTED" : isSubmitting ? "PACKET_STATUS: SENDING" : "PACKET_STATUS: READY";
   const terminalStatusLines = isSent
@@ -38,7 +39,16 @@ const Contact = () => {
     event.preventDefault();
     if (isSubmitting) return;
 
+    setErrorMsg(null);
     setIsSubmitting(true);
+    const accessKey = import.meta.env.WEB3FORMS_ACCESS_KEY || "";
+    if (!accessKey) {
+      const msg = "Missing WEB3FORMS_ACCESS_KEY in environment. Add it to .env and restart the dev server.";
+      console.warn(msg);
+      setErrorMsg(msg);
+      setIsSubmitting(false);
+      return;
+    }
     const formData = new FormData(event.currentTarget);
     formData.append("access_key", import.meta.env.WEB3FORMS_ACCESS_KEY || "");
 
@@ -56,9 +66,14 @@ const Contact = () => {
       if (result.success) {
         setIsSent(true);
         setTimeout(() => setIsSent(false), 5000);
+      } else {
+        const msg = result.message || "Failed to send message. Please try again later.";
+        console.warn("web3forms error:", result);
+        setErrorMsg(msg);
       }
     } catch (error) {
       console.error(error);
+      setErrorMsg("Network error while sending message. Check console for details.");
     } finally {
       setIsSubmitting(false);
     }
@@ -229,26 +244,35 @@ const Contact = () => {
                 ) : (
                   <motion.div
                     key="success-message"
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="flex min-h-[360px] flex-col items-center justify-center gap-5 px-6 py-10 text-center"
+                    className="flex min-h-[320px] flex-col items-center justify-center gap-4 px-6 py-8 text-center"
                   >
-                    <div className="flex h-20 w-20 items-center justify-center rounded-full border border-white/15 bg-white text-black">
-                      <CheckCircle2 className="h-10 w-10" strokeWidth={1.6} />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-white text-black">
+                      <CheckCircle2 className="h-8 w-8" strokeWidth={1.4} />
                     </div>
-                    <div className="space-y-2">
-                      <h3 className="font-mono text-2xl tracking-[0.12em] text-white">MESSAGE ACCEPTED</h3>
-                      <p className="max-w-md text-sm leading-6 text-white/60">
-                        Your transmission reached the uplink. I’ll respond as soon as I can.
+                    <div className="space-y-1">
+                      <h3 className="font-mono text-xl font-semibold tracking-[0.06em] text-white">Message sent — thank you!</h3>
+                      <p className="max-w-sm text-sm leading-6 text-white/60">
+                        I received your message. I’ll get back to you as soon as I can. If you prefer, you can also reach me directly at <a href={`mailto:${contactData.email}`} className="underline text-white/80">{contactData.email}</a>.
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsSent(false)}
-                      className="border border-white/20 px-5 py-2 font-mono text-[11px] uppercase tracking-[0.18em] text-white/75 transition-colors hover:bg-white/5 hover:text-white"
-                    >
-                      RESET_TERMINAL
-                    </button>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setIsSent(false)}
+                        className="border border-white/20 px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-white transition-colors hover:bg-white/5"
+                      >
+                        Send another
+                      </button>
+
+                      <a
+                        href={`mailto:${contactData.email}`}
+                        className="inline-flex items-center gap-2 border border-transparent bg-[#A5B4FC] px-4 py-2 font-mono text-[11px] uppercase tracking-[0.12em] text-black transition-colors hover:opacity-90"
+                      >
+                        Contact by email
+                      </a>
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>

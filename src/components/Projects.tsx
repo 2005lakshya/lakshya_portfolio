@@ -77,7 +77,10 @@ const Projects = () => {
   const ease = 1 - Math.pow(1 - progress, 3);
 
   const startX = Math.max(viewport.width * 0.5 - titleBounds.width / 2, 24);
-  const startY = Math.max(viewport.height * 0.5 - titleBounds.height / 2, 24);
+  // Limit startY so the heading doesn't start too far down on very tall viewports
+  const rawStartY = viewport.height * 0.5 - titleBounds.height / 2;
+  // Reduce the maximum so Projects heading stays near top on large viewports
+  const startY = Math.max(Math.min(rawStartY, 120), 24);
   const endX = 20;
   // For mobile, move the heading higher (smaller endY) so Projects appears earlier
   const endY = viewport.width < 768 ? 30 : 20;
@@ -96,8 +99,8 @@ const Projects = () => {
       {viewport.width < 1280 && (
         <h2
           aria-label="Projects"
-          className="site-title select-none text-center w-full px-4 pt-20 pb-0"
-          style={{ fontFamily: "Impact" }}
+          className="site-title select-none text-center w-full px-0 pt-20 pb-0"
+          style={{ fontFamily: "Impact", paddingLeft: 0, paddingRight: 0 }}
         >
           PROJECTS
         </h2>
@@ -111,18 +114,20 @@ const Projects = () => {
             aria-label="Projects"
             className="absolute left-0 top-0 w-full select-none whitespace-nowrap font-black uppercase leading-none tracking-normal text-[#d5d5d5] flex justify-center"
             style={{
-              transform: `translateY(${headingY}px) scale(${headingScale})`,
-              transformOrigin: "top center",
-              willChange: "transform",
-              fontFamily: "Impact",
-              /* flexible sizing: shrink to fit available space on small viewports */
-              whiteSpace: 'normal',
-              textAlign: 'center',
-              maxWidth: '90%',
-              overflowWrap: 'break-word',
-              /* keep a responsive clamp so it reduces on narrow screens */
-              fontSize: "clamp(16px, 9.5vw, 120px)",
-            }}
+                transform: `translateY(${headingY}px) scale(${headingScale})`,
+                transformOrigin: "top center",
+                willChange: "transform",
+                fontFamily: "Impact",
+                /* flexible sizing: shrink to fit available space on small viewports */
+                whiteSpace: 'normal',
+                textAlign: 'center',
+                maxWidth: '100%',
+                paddingLeft: 0,
+                paddingRight: 0,
+                overflowWrap: 'break-word',
+                /* keep a responsive clamp so it reduces on narrow screens */
+                fontSize: "clamp(16px, 9.5vw, 120px)",
+              }}
           >
             Projects
           </motion.h2>
