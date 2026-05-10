@@ -25,18 +25,20 @@
 
 .experience2 {
 	position: relative;
-	letter-spacing: -0.06em;
-	line-height: 0.88;
+	margin: 0 0 2rem;
+	max-width: none;
+	color: #f4f4f4;
 	font-family: Impact;
+	font-size: clamp(4rem, 7vw, 6.95rem);
+	line-height: 0.88;
+	letter-spacing: -0.06em;
+	text-transform: uppercase;
 	font-weight: 900;
 	display: flex;
 	justify-content: center;
 	align-items: center;
 	width: 100%;
-	margin-bottom: 80px;
 	text-align: center;
-	font-size: clamp(60px, 10vw, 137.4px);
-	color: #f4f4f4;
 }
 
 .experienceItem1, .experienceItem2, .experienceItem23 {
@@ -671,8 +673,7 @@ body {
 	}
 
 	.experience2 {
-		margin-bottom: 60px;
-		font-size: clamp(48px, 8vw, 80px);
+		margin-bottom: 0;
 	}
 
 	.experienceItem1,
@@ -734,5 +735,13 @@ body {
 	.container6,
 	.container24 {
 		display: none;
+	}
+}
+
+/* Small desktop / 14-inch laptop tuning */
+@media (min-width: 1025px) and (max-width: 2000px) {
+	.experience2 {
+		margin-bottom: 0;
+		letter-spacing: -0.03em;
 	}
 }

@@ -129,7 +129,7 @@ const Contact = () => {
 
               <div className="px-4 py-4 font-mono text-[12px] leading-6 text-white/85 md:px-5 md:py-5 md:text-[13px]">
                 <div className="mb-4 space-y-1 text-white/45">
-                  <p>Last login: Wed Oct 25 04:12:09 on ttys001</p>
+                  <p>Session status: encrypted uplink active</p>
                   <p>System architecture: ARM64_CORE</p>
                 </div>
 
