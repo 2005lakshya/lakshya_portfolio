@@ -15,13 +15,14 @@ export default function TechKeyboard() {
       return next;
     });
     setActive(key);
-    setTimeout(() => {
-      setPressed((prev) => {
-        const next = new Set(prev);
-        next.delete(key.id);
-        return next;
-      });
-    }, 180);
+  }, []);
+
+  const releaseKey = useCallback((key: KeyData) => {
+    setPressed((prev) => {
+      const next = new Set(prev);
+      next.delete(key.id);
+      return next;
+    });
   }, []);
 
   useEffect(() => {
@@ -120,6 +121,7 @@ export default function TechKeyboard() {
                         data={key}
                         isPressed={isPressed}
                         onClick={() => pressKey(key)}
+                        onMouseLeave={() => releaseKey(key)}
                       />
                     );
                   })}
@@ -164,10 +166,12 @@ function KeyCap({
   data,
   isPressed,
   onClick,
+  onMouseLeave,
 }: {
   data: KeyData;
   isPressed: boolean;
   onClick: () => void;
+  onMouseLeave: () => void;
 }) {
   const depth = 6;
 
@@ -175,6 +179,7 @@ function KeyCap({
     <button
       onClick={onClick}
       onMouseEnter={onClick}
+      onMouseLeave={onMouseLeave}
       className="relative focus:outline-none"
       style={{
         width: 68,

@@ -25,9 +25,10 @@
 
 .experience2 {
 	position: relative;
-	letter-spacing: -2.56px;
-	line-height: 1;
+	letter-spacing: -0.06em;
+	line-height: 0.88;
 	font-family: Impact;
+	font-weight: 900;
 	display: flex;
 	justify-content: center;
 	align-items: center;

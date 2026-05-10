@@ -332,7 +332,7 @@ body {
 
 .quoteLineOff {
   display: block;
-  color: #ffd54a;
+  color: #b99314;
   /* warmer yellow for contrast */
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
   margin-bottom: 14px;
