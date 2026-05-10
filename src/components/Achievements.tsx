@@ -61,7 +61,6 @@ const Achievements = () => {
                 <div className={styles.cardTopRow}>
                   {item.date ? (
                     <div className={styles.badge}>
-                      <span className={styles.badgeDot} />
                       <span>{item.date}</span>
                     </div>
                   ) : (
@@ -106,7 +105,6 @@ const Achievements = () => {
                 <div className={styles.cardTopRow}>
                   {item.date ? (
                     <div className={styles.badge}>
-                      <span className={styles.badgeDot} />
                       <span>{item.date}</span>
                     </div>
                   ) : (

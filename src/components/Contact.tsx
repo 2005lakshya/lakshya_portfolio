@@ -114,7 +114,7 @@ const Contact = () => {
                   <span className="h-2 w-2 rounded-full bg-[#f59e0b]" />
                   <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
                 </div>
-                <span>TERMINAL_SESSION v4.0.1</span>
+                <span>TERMINAL_SESSION</span>
                 <span className="w-9" aria-hidden />
               </div>
 
