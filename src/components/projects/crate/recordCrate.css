@@ -1,0 +1,146 @@
+/* Record crate (Projects section). Everything is prefixed rc- so it cannot
+   collide with the rest of the site's styles. */
+
+.rc-root {
+  --rc-ease: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ------------------------------------------------------------ entrances */
+
+@keyframes rc-fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes rc-drop-in { from { opacity: 0; transform: translateY(-460px) rotate(-7deg); } to { opacity: 1; transform: none; } }
+@keyframes rc-crate-in { from { opacity: 0; transform: translateY(80px); } to { opacity: 1; transform: none; } }
+@keyframes rc-deck-in { from { opacity: 0; transform: translateX(80px) scale(0.96); } to { opacity: 1; transform: none; } }
+@keyframes rc-stand-in { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------------------------------ record swapping */
+
+@keyframes rc-spin { to { transform: rotate(360deg); } }
+@keyframes rc-rec-in {
+  0% { opacity: 0; transform: translateX(-520px) translateY(-30px) rotate(-140deg) scale(0.7); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes rc-rec-in-short {
+  0% { opacity: 0; transform: translateY(-40px) rotate(-140deg) scale(0.7); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+/* The tonearm lifts off, waits while the record lands, and drops back on. */
+@keyframes rc-arm-cue {
+  0% { transform: rotate(35.7deg); }
+  18% { transform: rotate(31deg); }
+  42% { transform: rotate(4deg); }
+  68% { transform: rotate(4deg); }
+  100% { transform: rotate(35.7deg); }
+}
+@keyframes rc-cover-in {
+  0% { opacity: 0; transform: translateY(50px) rotate(-10deg) scale(0.8); }
+  60% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes rc-disc-in { from { opacity: 0; transform: translateY(90px); } to { opacity: 1; transform: none; } }
+@keyframes rc-info-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes rc-eq { from { transform: scaleY(0.25); } to { transform: scaleY(1); } }
+@keyframes rc-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(250, 26, 29, 0.7); }
+  50% { box-shadow: 0 0 0 7px rgba(250, 26, 29, 0); }
+}
+@keyframes rc-sheen { 0% { background-position: 130% 0; } 45%, 100% { background-position: -30% 0; } }
+
+.rc-spin-record { animation: rc-spin 1.8s linear infinite; }
+.rc-spin-disc { animation: rc-spin 6s linear infinite; }
+.rc-paused { animation-play-state: paused !important; }
+.rc-paused .rc-eq-bar { animation-play-state: paused; }
+
+.rc-eq-bar { transform-origin: bottom; animation: rc-eq 0.5s ease-in-out infinite alternate; }
+.rc-eq-bar:nth-child(2) { animation-duration: 0.7s; animation-delay: 0.2s; }
+.rc-eq-bar:nth-child(3) { animation-duration: 0.45s; animation-delay: 0.1s; }
+.rc-eq-bar:nth-child(4) { animation-duration: 0.6s; animation-delay: 0.3s; }
+
+.rc-pulse-dot { animation: rc-pulse 1.6s ease-out infinite; }
+
+.rc-sheen {
+  background: linear-gradient(115deg, rgba(255, 255, 255, 0) 35%, rgba(255, 255, 255, 0.45) 48%, rgba(255, 255, 255, 0) 60%);
+  background-size: 260% 100%;
+  animation: rc-sheen 5s ease-in-out 1.5s infinite;
+}
+
+/* ------------------------------------------------------------ the cover */
+
+.rc-stand { transition: transform 300ms var(--rc-ease); }
+.rc-stand:hover { transform: translateY(-6px); }
+.rc-flip { transform-style: preserve-3d; transition: transform 850ms var(--rc-ease); }
+.rc-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* ------------------------------------------------------------- controls */
+
+.rc-pill { transition: transform 250ms var(--rc-ease), background-color 250ms ease-out, color 250ms ease-out; }
+.rc-pill:hover { transform: translateY(-3px); background-color: #f4f4f4; color: #000000; }
+.rc-stop { transition: background-color 200ms ease-out, transform 150ms ease-out; }
+.rc-stop:hover { background-color: #2e2e2e; }
+.rc-stop:active { transform: translateY(2px); }
+.rc-sound { transition: border-color 200ms ease-out, color 200ms ease-out; }
+.rc-sound:hover { border-color: #f4f4f4; color: #f4f4f4; }
+.rc-root button:focus-visible,
+.rc-root a:focus-visible { outline: 3px solid #74d4f0; outline-offset: 3px; }
+.rc-shelf-item { transition: transform 300ms var(--rc-ease); }
+.rc-shelf-item:active { transform: scale(0.97); }
+
+/* --------------------------------------------------- scene and label art */
+
+.rc-scene-svg { display: block; }
+
+@keyframes rc-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes rc-wiggle { 0%, 100% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } }
+@keyframes rc-steam { 0% { opacity: 0; transform: translateY(6px); } 40% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+@keyframes rc-blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(0.1); } }
+@keyframes rc-chargeL { 0%, 100% { transform: translateX(0); } 45%, 55% { transform: translateX(34px); } }
+@keyframes rc-chargeR { 0%, 100% { transform: translateX(0); } 45%, 55% { transform: translateX(-34px); } }
+@keyframes rc-ko {
+  0%, 38% { opacity: 0; transform: scale(0.2) rotate(-20deg); }
+  50% { opacity: 1; transform: scale(1.15) rotate(6deg); }
+  62% { opacity: 1; transform: none; }
+  75%, 100% { opacity: 0; transform: scale(0.6); }
+}
+@keyframes rc-spark { 0%, 40% { opacity: 0; } 48%, 58% { opacity: 1; } 66%, 100% { opacity: 0; } }
+@keyframes rc-twinkle { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+@keyframes rc-type { 0% { transform: scaleX(0); } 40%, 100% { transform: scaleX(1); } }
+@keyframes rc-cursor { 50% { opacity: 0; } }
+@keyframes rc-run { from { transform: translateX(0); } to { transform: translateX(62px); } }
+@keyframes rc-crawl { from { transform: translateX(0); } to { transform: translateX(44px); } }
+@keyframes rc-crawlBack { from { transform: translateX(0); } to { transform: translateX(-40px); } }
+@keyframes rc-sweep { 0%, 100% { transform: translateX(-70px); } 50% { transform: translateX(70px); } }
+@keyframes rc-drift { from { transform: translateX(-10px); } to { transform: translateX(14px); } }
+@keyframes rc-fall { 0% { opacity: 0; transform: translateY(0); } 20% { opacity: 1; } 100% { opacity: 0; transform: translateY(46px); } }
+@keyframes rc-sway { 0%, 100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes rc-key-swing { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+@keyframes rc-z { 0% { opacity: 0; transform: translate(0, 0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -22px); } }
+@keyframes rc-zfloat { 0%, 100% { transform: translateY(0); opacity: 1; } 50% { transform: translateY(-6px); opacity: 0.6; } }
+@keyframes rc-chatA {
+  0%, 8% { opacity: 0; transform: scale(0.6); }
+  14%, 48% { opacity: 1; transform: none; }
+  54%, 100% { opacity: 0; transform: scale(0.9); }
+}
+@keyframes rc-chatB {
+  0%, 52% { opacity: 0; transform: scale(0.6); }
+  58%, 92% { opacity: 1; transform: none; }
+  98%, 100% { opacity: 0; transform: scale(0.9); }
+}
+
+/* Everything settles into its resting frame for visitors who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .rc-root *,
+  .rc-root *::before,
+  .rc-root *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

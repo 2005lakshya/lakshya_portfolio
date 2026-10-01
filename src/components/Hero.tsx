@@ -1,6 +1,32 @@
 import React, { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import styles from "./Hero.module.css";
+import DraggableSticker from "./hero/DraggableSticker";
+import { NEW_STICKER_SVG } from "./hero/stickerArt";
+
+const STICKERS = [
+  { file: "404error.png", label: "Error 404 sticker" },
+  { file: "code.png", label: "Code sticker" },
+  { file: "codeon.png", label: "Code on sticker" },
+  { file: "eatsleep.png", label: "Eat, sleep, code, repeat sticker" },
+  { file: "fullstack.png", label: "Full-stack developer sticker" },
+  { file: "justcodeit.png", label: "Just code it sticker" },
+  { file: "ihate.png", label: "I hate programming sticker" },
+  { file: "coffee.png", label: "Coffee and coding sticker" },
+];
+
+/** How far each sticker rises as the hero scrolls away; uneven, so they peel off at their own speeds. */
+const DRIFT = [-220, -120, -300, -80, -180, -260, -140, -60, -240];
+
+/** The drawn stickers, placed on the graph paper as fractions of a 1250 x 648 sheet. */
+const EXTRA_STICKERS = [
+  { id: "git", label: "git push --force sticker", x: 230, y: 128, w: 200, r: -6, z: 21 },
+  { id: "hello", label: "Hello, World! sticker", x: 648, y: 40, w: 180, r: 6, z: 21 },
+  { id: "ctrlz", label: "Ctrl + Z sticker", x: 38, y: 352, w: 190, r: -4, z: 21 },
+  { id: "bug", label: "Not a bug, it's a feature sticker", x: 890, y: 468, w: 170, r: -6, z: 23 },
+  { id: "vit", label: "VIT Vellore pennant sticker", x: 250, y: 14, w: 190, r: -8, z: 22 },
+  { id: "works", label: "It works on my machine sticker", x: 10, y: 112, w: 124, r: -8, z: 22 },
+];
 
 type WeatherState = {
   temperature: number;
@@ -226,47 +252,38 @@ const Hero = () => {
         </div>
       </div>
 
-      <div className={styles.heroBottomSectionWithGrid}>
+      <div className={styles.heroBottomSectionWithGrid} data-hero-paper>
         <div className={styles.stickersContainer}>
-          {/* Render stickers; on laptop breakpoint we apply absolute randomized placement/rotation */}
-          {(() => {
-            const list = [
-              "404error.png",
-              "code.png",
-              "codeon.png",
-              "eatsleep.png",
-              "fullstack.png",
-              "justcodeit.png",
-              "ihate.png",
-              "coffee.png",
-            ];
-
-            return list.map((name) => {
-              const s = stickerStyles[name];
-              const style = s
-                ? {
-                  left: `${s.left}%`,
-                  top: `${s.top}%`,
-                  transform: `rotate(${s.rotation}deg)`,
-                  zIndex: s.z,
-                }
-                : undefined;
-
-              const className = s
-                ? `${styles.sticker} ${styles.stickerAbsolute}`
-                : styles.sticker;
-
-              return (
-                <img
-                  key={name}
-                  src={`/stickers/${name}`}
-                  alt={name.replace(/\.png$/, "")}
-                  className={className}
-                  style={style}
-                />
-              );
-            });
-          })()}
+          {/* Every sticker can be picked up, moved and thrown off the paper. */}
+          {STICKERS.map(({ file, label }, i) => {
+            const s = stickerStyles[file];
+            return (
+              <DraggableSticker
+                key={file}
+                label={label}
+                dealAt={0.35 + i * 0.08}
+                drift={DRIFT[i % DRIFT.length]}
+                rotation={s ? s.rotation : 0}
+                className={s ? styles.stickerAbsolute : undefined}
+                style={s ? { left: `${s.left}%`, top: `${s.top}%`, zIndex: s.z } : undefined}
+              >
+                <img src={`/stickers/${file}`} alt="" className={styles.sticker} draggable={false} />
+              </DraggableSticker>
+            );
+          })}
+          {EXTRA_STICKERS.map((k, j) => (
+            <DraggableSticker
+              key={k.id}
+              label={k.label}
+              dealAt={1 + j * 0.07}
+              drift={DRIFT[(j + 3) % DRIFT.length]}
+              rotation={k.r}
+              className={`${styles.stickerAbsolute} hs-extra`}
+              style={{ left: `${(k.x / 1250) * 100}%`, top: `${(k.y / 648) * 100}%`, width: `${(k.w / 1250) * 100}%`, zIndex: k.z }}
+            >
+              <div dangerouslySetInnerHTML={{ __html: NEW_STICKER_SVG[k.id] }} />
+            </DraggableSticker>
+          ))}
         </div>
         <img src="/Lakshya.png" alt="Lakshya" className={styles.lakshyaIcon} />
       </div>

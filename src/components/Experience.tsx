@@ -1,266 +1,244 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { experienceData } from '../data/portfolio';
-import styles from './Experience.module.css';
+import { useEffect, useLayoutEffect, useState } from "react";
+import "./experience/experience.css";
+import SprayHeading from "@/components/site/SprayHeading";
+import ScaledStage from "@/components/site/ScaledStage";
+import { useInView, useMediaQuery, useOnScreen, useWidth } from "@/components/site/hooks";
+import { playFilm } from "@/components/site/sfx";
+import { gsap, settle } from "@/components/site/motion";
+
+/**
+ * Experience as flyers pasted into the frames of a long film strip. The strip
+ * winds on to each role in turn; the flyer in the gate flaps, the clapperboard
+ * snaps with the scene and take, and the role's description plays as a
+ * subtitle. Pointing at the strip holds it; clicking a flyer jumps to it.
+ */
+
+type Flyer = {
+  org: string;
+  role: string;
+  when: string;
+  take: string;
+  bg: string;
+  ink: string;
+  accent: string;
+  roleSize: number;
+  tilt: number;
+  logo?: string;
+  stats?: { big: string; small: string }[];
+  text: string;
+};
+
+const FLYERS: Flyer[] = [
+  { org: "Havells India", role: "Summer Intern", when: "MAY TO JULY 2025", take: "2025", bg: "#F4F0E6", ink: "#111111", accent: "#FA1A1D", roleSize: 50, tilt: -1.5, logo: "/havells.png", text: "Developed a Student Data Management System using ASP.NET MVC (C#) and PostgreSQL. Built secure authentication with role-based access. Completed independently with weekly mentor reviews." },
+  { org: "Takshilah Global School", role: "Coding and cyber security sessions", when: "2025", take: "2025", bg: "#FFD23F", ink: "#111111", accent: "#111111", roleSize: 34, tilt: 1.5, text: "Conducted coding and cyber security outreach sessions at Takshilah Global School to empower students." },
+  { org: "IEEE-TEMS", role: "Secretary", when: "JANUARY 2026 TO NOW", take: "2026", bg: "#2849CB", ink: "#FFFFFF", accent: "#FFD23F", roleSize: 52, tilt: -1, logo: "/ieeetems.png", stats: [{ big: "100+", small: "MEMBERS" }, { big: "+20%", small: "ENGAGEMENT" }, { big: "250+", small: "PARTICIPANTS" }], text: "Led a 100+ member chapter, overseeing multiple technical initiatives and driving a 20% increase in engagement through a mentorship program. Coordinated cross-team efforts and helped organize CodeRush 3.0 and HackXpertise 2.0 at graVITas'25, attracting 250+ participants." },
+  { org: "Riviera'26", role: "Events Coordinator", when: "FEBRUARY 2026 · 150+ EVENTS", take: "2026", bg: "#E2B5F0", ink: "#111111", accent: "#111111", roleSize: 44, tilt: 1, text: "Coordinated cultural events and managed promotion for Riviera'26, VIT's flagship cultural fest with over 150 events." },
+  { org: "NTT DATA", role: "Summer Intern", when: "MAY 2026", take: "2026", bg: "#74D4F0", ink: "#111111", accent: "#111111", roleSize: 50, tilt: -1.5, logo: "/nttdata.png", text: "Joined NTT DATA as a summer intern in May 2026." },
+];
+
+const FRAME = 380;
+const X = (i: number) => 60 + i * FRAME;
+const pad = (n: number) => `0${n}`;
+const LEADERS = [{ i: -2, t: "3" }, { i: -1, t: "2" }, { i: 5, t: "END" }, { i: 6, t: "" }];
+
+/** Runs the strip: which frame is in the gate, and a counter that restarts the one-shot animations. */
+function useReel(active: boolean) {
+  const [cur, setCur] = useState(0);
+  const [turn, setTurn] = useState(0);
+  const [held, setHeld] = useState(false);
+  useEffect(() => {
+    if (!active || held) return;
+    const id = window.setInterval(() => {
+      setCur((c) => (c + 1) % FLYERS.length);
+      setTurn((t) => t + 1);
+    }, 5600);
+    return () => window.clearInterval(id);
+  }, [active, held]);
+  // Only a frame the visitor picked makes a sound; the strip winding on by itself stays quiet.
+  const pick = (i: number) => {
+    setHeld(true);
+    if (i !== cur) {
+      playFilm();
+      setCur(i);
+      setTurn((t) => t + 1);
+    }
+  };
+  return { cur, turn, setHeld, pick };
+}
+
+type Reel = ReturnType<typeof useReel>;
+
+function FlyerCard({ f, i, cur, turn, onPick }: { f: Flyer; i: number; cur: number; turn: number; onPick: (i: number) => void }) {
+  const on = i === cur;
+  return (
+    <button
+      type="button"
+      className="ex-flyer"
+      onClick={() => onPick(i)}
+      aria-label={`${f.org}, ${f.role}`}
+      aria-pressed={on}
+      style={{ left: X(i), transform: `rotate(${f.tilt}deg)`, filter: on ? "none" : "grayscale(0.7) brightness(0.5)" }}
+    >
+      <span key={on ? `on-${turn}` : "idle"} className={`ex-sheet ${on ? "is-cur" : "is-idle"}`} style={{ background: f.bg, color: f.ink, animationDuration: on ? undefined : `${(5 + i * 0.6).toFixed(1)}s` }}>
+        <span className="flex items-center gap-3">
+          {f.logo && <img src={f.logo} alt="" className="h-12 w-12 rounded-lg bg-white object-contain p-[3px]" />}
+          <span>
+            <span className="block" style={{ fontFamily: "Anton, Impact, sans-serif", fontSize: 20, letterSpacing: 2 }}>{f.org.toUpperCase()}</span>
+            <span className="block" style={{ fontSize: 13, letterSpacing: 1.5 }}>{f.when}</span>
+          </span>
+        </span>
+        <span className="mt-3 block" style={{ fontFamily: "Anton, Impact, sans-serif", fontSize: f.roleSize, lineHeight: 0.95, color: f.accent }}>{f.role.toUpperCase()}</span>
+        {f.stats && (
+          <span className="mt-2.5 flex gap-3.5">
+            {f.stats.map((s) => (
+              <span key={s.small}>
+                <span className="block" style={{ fontFamily: "Anton, Impact, sans-serif", fontSize: 28, lineHeight: 1 }}>{s.big}</span>
+                <span className="block" style={{ fontSize: 10, letterSpacing: 1 }}>{s.small}</span>
+              </span>
+            ))}
+          </span>
+        )}
+        <span className="absolute bottom-3.5 left-5" style={{ fontSize: 12, letterSpacing: 1 }}>SCENE {pad(i + 1)}</span>
+      </span>
+      <span className="ex-staple" style={{ left: 22 }} />
+      <span className="ex-staple" style={{ right: 22, animationDelay: "1.3s" }} />
+    </button>
+  );
+}
+
+/** The strip itself, drawn at full size inside a box `width` px wide. */
+function Strip({ reel, width }: { reel: Reel; width: number }) {
+  const shift = width / 2 - (X(reel.cur) + 165);
+  return (
+    <div className="ex-strip absolute left-0 top-0 h-[360px] overflow-hidden" style={{ width, transform: "rotate(-1deg)" }} onMouseEnter={() => reel.setHeld(true)} onMouseLeave={() => reel.setHeld(false)}>
+      <div data-ex-pull className="absolute left-0 top-0 h-[360px]" style={{ width }}>
+      <div className="absolute left-0 top-0 h-[360px]" style={{ width, transform: `translateX(${shift}px)`, transition: "transform 1000ms cubic-bezier(0.65,0,0.35,1)" }}>
+        <div className="absolute top-0 h-[360px]" style={{ left: -2400, width: 7200, background: "#171717", boxShadow: "inset 0 1px 0 #2E2E2E, inset 0 -1px 0 #2E2E2E" }} />
+        <div className="ex-holes absolute top-[10px] h-[18px]" style={{ left: -2400, width: 7200 }} />
+        <div className="ex-holes absolute bottom-[10px] h-[18px]" style={{ left: -2400, width: 7200 }} />
+        {LEADERS.map((l) => (
+          <div key={l.i} className="absolute top-[44px] flex h-[262px] w-[330px] items-center justify-center" style={{ left: X(l.i), background: "#1E1B18", fontFamily: "'Permanent Marker', cursive", fontSize: 90, color: "#3A352E" }}>
+            {l.t}
+          </div>
+        ))}
+        {FLYERS.map((f, i) => (
+          <FlyerCard key={f.org} f={f} i={i} cur={reel.cur} turn={reel.turn} onPick={reel.pick} />
+        ))}
+      </div>
+      </div>
+    </div>
+  );
+}
+
+function Clapper({ reel, scale = 1 }: { reel: Reel; scale?: number }) {
+  const f = FLYERS[reel.cur];
+  return (
+    <div className="relative" style={{ width: 300 * scale, height: 250 * scale }}>
+      <svg width={300 * scale} height={250 * scale} viewBox="0 0 300 250" aria-hidden className="absolute left-0 top-0">
+        <g fill="none" stroke="#F4F4F4" strokeWidth="4" strokeLinejoin="round" style={{ filter: "drop-shadow(0 0 6px rgba(255,255,255,0.45))" }}>
+          <rect x="20" y="84" width="260" height="150" rx="6" />
+          <path d="M20 124 H280 M150 124 V234" />
+          <g key={reel.turn} className="ex-clap">
+            <rect x="20" y="50" width="260" height="34" rx="4" />
+            <path d="M44 50 L62 84 M94 50 L112 84 M144 50 L162 84 M194 50 L212 84 M244 50 L262 84" />
+          </g>
+        </g>
+      </svg>
+      <div className="absolute left-0 top-0 origin-top-left" style={{ width: 300, height: 250, transform: `scale(${scale})`, fontFamily: "'Permanent Marker', cursive", color: "#F4F4F4" }}>
+        <span className="absolute left-[32px] top-[136px] text-[24px]">SCENE</span>
+        <span className="absolute left-[162px] top-[136px] text-[24px]">TAKE</span>
+        <span className="absolute left-[40px] top-[174px] text-[40px] leading-none text-[#FFD23F]">{pad(reel.cur + 1)}</span>
+        <span className="absolute left-[166px] top-[174px] text-[40px] leading-none text-[#FFD23F]">{f.take}</span>
+      </div>
+    </div>
+  );
+}
+
+function Subtitle({ reel, size }: { reel: Reel; size: number }) {
+  const f = FLYERS[reel.cur];
+  return (
+    <div className="text-center" aria-live="polite">
+      <div style={{ fontFamily: "'Space Mono', monospace", fontSize: 13, fontWeight: 700, letterSpacing: 4, color: "#BDB3A6" }}>
+        {f.org.toUpperCase()} · {f.role.toUpperCase()}
+      </div>
+      <p key={reel.turn} className="ex-sub m-0 mt-3" style={{ fontSize: size, lineHeight: 1.45 }}>
+        {f.text}
+      </p>
+    </div>
+  );
+}
+
+const SCRAPS = [
+  { y: 180, w: 24, h: 16, c: "#ECE4D2", delay: 2 },
+  { y: 580, w: 18, h: 14, c: "#FFD23F", delay: 2.3 },
+  { y: 860, w: 22, h: 16, c: "#E2B5F0", delay: 2.15 },
+];
+
+const DRIPS = [
+  { x: 0.833, y: 1.0, h: 0.52, w: 0.052 },
+  { x: 3.458, y: 0.85, h: 0.4, w: 0.042 },
+];
 
 const Experience = () => {
-    const [scrollDir, setScrollDir] = useState<'down' | 'up'>('down');
-    const sectionRef = useRef<HTMLDivElement>(null);
-    const titleRef = useRef<HTMLDivElement>(null);
-    const itemsContainerRef = useRef<HTMLDivElement>(null);
-    const [scrollProgress, setScrollProgress] = useState(0);
+  const desktop = useMediaQuery("(min-width: 900px)");
+  const [ref, on] = useInView<HTMLElement>(0.2);
+  const [screenRef, onScreen] = useOnScreen<HTMLDivElement>();
+  const reel = useReel(on && onScreen);
+  const [boxRef, boxW] = useWidth<HTMLDivElement>();
 
-    const { scrollYProgress: sectionScrollProgress } = useScroll({
-        target: sectionRef,
-        offset: ["start center", "end center"],
-    });
+  // The strip is pulled in from the right like film off a reel, and the clapperboard settles in after it.
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const ctx = gsap.context(() => {
+      settle(root.querySelectorAll("[data-ex-pull]"), { x: 900 }, { trigger: root, start: "top 70%", duration: 1.1 });
+      settle(root.querySelectorAll("[data-ex-clapper]"), { y: 60, rotation: -8, opacity: 0 }, { trigger: root, start: "top 55%", delay: 0.5 });
+    }, root);
+    return () => ctx.revert();
+  }, [ref, desktop]);
 
-    useMotionValueEvent(sectionScrollProgress, "change", (latest) => {
-        setScrollProgress(latest);
-    });
-
-    useEffect(() => {
-        let lastScrollY = window.pageYOffset;
-        const updateScrollDir = () => {
-            const scrollY = window.pageYOffset;
-            setScrollDir(scrollY > lastScrollY ? 'down' : 'up');
-            lastScrollY = scrollY > 0 ? scrollY : 0;
-        };
-        window.addEventListener('scroll', updateScrollDir);
-        return () => window.removeEventListener('scroll', updateScrollDir);
-    }, []);
-
-    // Variants for consistent animations - refined for smoother center-oriented motion
-    const leftSlideVariants = {
-        hidden: { opacity: 0, x: -80, y: 100 },
-        visible: { 
-            opacity: 1, 
-            x: 0, 
-            y: 0,
-            transition: { duration: 1.2 }
-        }
-    };
-
-    const rightSlideVariants = {
-        hidden: { opacity: 0, x: 80, y: 100 },
-        visible: { 
-            opacity: 1, 
-            x: 0, 
-            y: 0,
-            transition: { duration: 1.2 }
-        }
-    };
-
-    const nestedVariants = {
-        hidden: { opacity: 0, y: 30 },
-        visible: { 
-            opacity: 1, 
-            y: 0,
-            transition: { duration: 0.8 }
-        }
-    };
-
-    // Calculate scroll-based animation values for left items (come from bottom-left)
-    const getLeftItemAnimation = (itemIndex: number) => {
-        const itemOffset = itemIndex * 0.25;
-        const progress = Math.max(0, Math.min(1, (scrollProgress - itemOffset) / 0.25));
-        const isScrollingDown = scrollDir === 'down';
-        
-        if (!isScrollingDown) {
-            return { x: 0, y: 0, opacity: 1 };
-        }
-        
-        const x = -80 * (1 - progress);
-        const y = 100 * (1 - progress);
-        const opacity = progress;
-        
-        return { x, y, opacity };
-    };
-
-    // Calculate scroll-based animation values for right items (come from bottom-right)
-    const getRightItemAnimation = (itemIndex: number) => {
-        const itemOffset = itemIndex * 0.25;
-        const progress = Math.max(0, Math.min(1, (scrollProgress - itemOffset) / 0.25));
-        const isScrollingDown = scrollDir === 'down';
-        
-        if (!isScrollingDown) {
-            return { x: 0, y: 0, opacity: 1 };
-        }
-        
-        const x = 80 * (1 - progress);
-        const y = 100 * (1 - progress);
-        const opacity = progress;
-        
-        return { x, y, opacity };
-    };
-
-    // Extract data from portfolio.ts with more robust case-insensitive search
-    const nttData = experienceData.find(e => e.title.toUpperCase().includes("NTT")) || experienceData[0];
-    const ieeeData = experienceData.find(e => e.title.toUpperCase().includes("IEEE")) || experienceData[1];
-    const havellsData = experienceData.find(e => e.title.toUpperCase().includes("HAVELLS")) || experienceData[2];
-
-    // If scrolling up, we bypass the hidden state to keep items at their position
-    const isScrollingUp = scrollDir === 'up';
-
-    useEffect(() => {
-        gsap.registerPlugin(ScrollTrigger);
-
-        // animate title on load
-        if (titleRef.current) {
-            gsap.fromTo(
-                titleRef.current,
-                { opacity: 0, y: 50 },
-                { opacity: 1, y: 0, duration: 1, ease: 'power2.out' }
-            );
-        }
-
-        const container = itemsContainerRef.current || sectionRef.current;
-        const createdTriggers: any[] = [];
-        if (container) {
-            const cards = container.querySelectorAll('.exp-card');
-            cards.forEach((card: Element, index: number) => {
-                const isEven = index % 2 === 0;
-
-                const anim = gsap.fromTo(
-                    card,
-                    { opacity: 0, x: isEven ? -100 : 100, y: 50 },
-                    {
-                        opacity: 1,
-                        x: 0,
-                        y: 0,
-                        duration: 0.8,
-                        ease: 'power2.out',
-                        scrollTrigger: {
-                            trigger: card,
-                            start: 'top 80%',
-                            end: 'bottom 20%',
-                            toggleActions: 'play none none reverse',
-                        },
-                    }
-                );
-                if (anim && anim.scrollTrigger) createdTriggers.push(anim.scrollTrigger);
-
-                const contentEls = card.querySelectorAll('.content-element');
-                const animContent = gsap.fromTo(
-                    contentEls,
-                    { opacity: 0, y: 30 },
-                    {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.6,
-                        stagger: 0.1,
-                        delay: 0.2,
-                        ease: 'power2.out',
-                        scrollTrigger: {
-                            trigger: card,
-                            start: 'top 80%',
-                            end: 'bottom 20%',
-                            toggleActions: 'play none none reverse',
-                        },
-                    }
-                );
-                if (animContent && animContent.scrollTrigger)
-                    createdTriggers.push(animContent.scrollTrigger);
-            });
-        }
-
-        return () => {
-            createdTriggers.forEach((t) => t && t.kill && t.kill());
-        };
-    }, []);
-
-    return (
-        <div id="experience" className={styles.experience} ref={(el) => { sectionRef.current = el; itemsContainerRef.current = el; }}>
-            <motion.div 
-                ref={titleRef}
-                className={`exp-title ${styles.experience2}`}
-                initial={isScrollingUp ? { opacity: 1, y: 0 } : { opacity: 0, y: -20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: false }}
-                transition={{ duration: 0.8 }}
-            >
-                EXPERIENCE
-            </motion.div>
-
-            {/* Entry 1 (NTT DATA) */}
-            <div className={`exp-card ${styles.experienceItem2}`}>
-                <div className={styles.container5}>
-                    <div className={styles.container6}>
-                        <b className={styles.text}>.01</b>
-                    </div>
-                    <img
-                        src="/nttdata.png"
-                        alt="NTT DATA"
-                        className={`content-element ${styles.companyLogo}`}
-                    />
-                </div>
-                <div className={styles.verticalborder2}>
-                    <div className={styles.container4}>
-                        <div className={`content-element ${styles.may2025}`}>{nttData.date}</div>
-                    </div>
-                    <div className={styles.heading4}>
-                        <b className={`content-element ${styles.summerIntern}`}>{nttData.role}</b>
-                    </div>
-                    <div className={styles.backgroundborder2} />
-                </div>
+  return (
+    <section id="experience" ref={ref} aria-label="Experience" className={`ex-root ${on ? "is-on" : ""}`}>
+      <div ref={screenRef}>
+        {desktop ? (
+          <ScaledStage w={1440} h={900}>
+            <div className="absolute" style={{ left: 70, top: 22 }}>
+              <SprayHeading text="EXPERIENCE" size="96px" drips={DRIPS} />
             </div>
-
-            {/* Entry 2 (IEEE-TEMS) */}
-            <div 
-                className={`exp-card ${styles.experienceItem23}`}>
-                <div className={styles.verticalborder5}>
-                    <div className={styles.container22}>
-                        <div className={`content-element ${styles.january2026}`}>{ieeeData.date}</div>
-                    </div>
-                    <div className={styles.heading45}>
-                        <b className={`content-element ${styles.secretary}`}>{ieeeData.role}</b>
-                    </div>
-                    <div className={styles.overlayborder5}>
-                        <div 
-                            className={`content-element ${styles.spearheadedTheDevelopment}`} 
-                            dangerouslySetInnerHTML={{ __html: ieeeData.description }} 
-                        />
-                    </div>
-                    <div className={styles.backgroundborder9} />
-                </div>
-                <div className={styles.container23}>
-                    <div className={styles.container24}>
-                        <b className={styles.text}>.02</b>
-                    </div>
-                    <img
-                        src="/ieeetems.png"
-                        alt="IEEE-TEMS"
-                        className={`content-element ${styles.companyLogo}`}
-                    />
-                </div>
+            <div className="absolute left-0" style={{ top: 196, width: 1440, height: 360 }}>
+              <Strip reel={reel} width={1440} />
             </div>
-
-            {/* Entry 3 (Havells) */}
-            <div className={`exp-card ${styles.experienceItem1}`}>
-                <div className={styles.container}>
-                    <img
-                        src="/havells.png"
-                        alt="Havells India Limited"
-                        className={`content-element ${styles.companyLogo}`}
-                    />
-                </div>
-                <div className={styles.verticalborder}>
-                    <div className={styles.container4}>
-                        <div className={`content-element ${styles.may2025}`}>{havellsData.date}</div>
-                    </div>
-                    <div className={styles.heading4}>
-                        <b className={`content-element ${styles.summerIntern}`}>{havellsData.role}</b>
-                    </div>
-                    <div className={styles.overlayborder}>
-                        <div className={`content-element ${styles.developedAStudent}`}>{havellsData.description}</div>
-                    </div>
-                    <div className={styles.backgroundborder2} />
-                </div>
+            <div data-ex-clapper className="absolute" style={{ left: 60, top: 606 }}>
+              <Clapper reel={reel} />
             </div>
-        </div>
-    );
+            <div className="absolute flex items-center justify-center" style={{ left: 400, top: 600, width: 980, height: 250 }}>
+              <Subtitle reel={reel} size={23} />
+            </div>
+            {SCRAPS.map((b) => (
+              <div key={b.y} className="ex-scrap" style={{ top: b.y, width: b.w, height: b.h, background: b.c, animationDelay: `${b.delay}s` }} />
+            ))}
+          </ScaledStage>
+        ) : (
+          <div className="pb-16 pt-12">
+            <div className="px-5">
+              <SprayHeading text="EXPERIENCE" size="clamp(48px, 13vw, 80px)" drips={DRIPS} />
+            </div>
+            <div ref={boxRef} className="relative mt-8 w-full overflow-hidden" style={{ height: 360 * 0.72 }}>
+              {boxW > 0 && (
+                <div className="absolute left-0 top-0 origin-top-left" style={{ width: boxW / 0.72, height: 360, transform: "scale(0.72)" }}>
+                  <Strip reel={reel} width={boxW / 0.72} />
+                </div>
+              )}
+            </div>
+            <div className="mt-6 flex flex-col items-center gap-6 px-5">
+              <Clapper reel={reel} scale={0.6} />
+              <Subtitle reel={reel} size={18} />
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
 };
 
 export default Experience;
