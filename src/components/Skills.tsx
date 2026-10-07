@@ -1,275 +1,172 @@
-"use client";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
+import "./skills/skills.css";
+import SprayHeading from "@/components/site/SprayHeading";
+import ScaledStage from "@/components/site/ScaledStage";
+import { stagePoint, useMediaQuery } from "@/components/site/hooks";
+import { playClick } from "@/components/site/sfx";
 
-import { useState, useEffect, useCallback } from "react";
+/**
+ * Skills as tags sprayed on a black wall in UV paint: invisible until the
+ * torch passes over them. The torch follows the mouse, and wanders by itself
+ * when nobody is holding it. A red count marks how many projects used a skill.
+ */
 
-import { keys, rows as ROWS, type KeyData } from "@/data/keycaps";
+const W = 1440;
+const H = 900;
 
-export default function TechKeyboard() {
-  const [pressed, setPressed] = useState<Set<string>>(new Set());
-  const [active, setActive] = useState<KeyData | null>(null);
+/** Under UV every tag lights up in the colour of the project that uses it most. */
+const NEON: Record<string, string> = { RoboWars: "#F3A8FF", HackXpertise: "#FF4D50", Verimind: "#8FA2FF", "Plant Care": "#7FE3FF", MessIT: "#FFFFFF", BunkBuddies: "#FFFFFF" };
+const USED: Record<string, string[]> = {
+  REACT: ["RoboWars", "HackXpertise", "BunkBuddies"],
+  TYPESCRIPT: ["RoboWars", "BunkBuddies"],
+  PYTHON: ["Verimind", "Plant Care"],
+  TAILWIND: ["RoboWars", "BunkBuddies"],
+  FIREBASE: ["MessIT", "BunkBuddies"],
+  FLUTTER: ["MessIT"],
+  "NODE.JS": ["HackXpertise"],
+  MONGODB: ["HackXpertise"],
+  TENSORFLOW: ["Plant Care"],
+  FLASK: ["Plant Care"],
+  "GEMINI AI": ["Plant Care"],
+  ML: ["Verimind"],
+};
+/** [name, x, y, size, rotation] on the 1440 x 900 wall. */
+const LAYOUT: [string, number, number, number, number][] = [
+  ["REACT", 70, 180, 120, -6], ["JAVA", 508, 214, 52, 4], ["TYPESCRIPT", 679, 190, 80, -3], ["C++", 1253, 206, 52, 8],
+  ["NEXT.JS", 70, 342, 46, 5], ["PYTHON", 319, 314, 104, 3], ["TAILWIND", 773, 322, 74, -5], ["FIGMA", 1205, 334, 48, -6],
+  ["FIREBASE", 70, 452, 80, -2], ["FLUTTER", 535, 458, 64, 6], ["KOTLIN", 870, 472, 46, -4], ["NODE.JS", 1088, 454, 60, 3],
+  ["MONGODB", 70, 580, 68, 4], ["EXPRESS", 424, 596, 44, -5], ["TENSORFLOW", 663, 578, 72, -3], ["GIT", 1183, 586, 56, 10],
+  ["FASTAPI", 70, 708, 44, -4], ["FLASK", 309, 694, 74, 5], ["GEMINI AI", 591, 700, 66, -4], ["JAVASCRIPT", 1025, 714, 42, -6],
+  ["POSTGRES", 90, 816, 44, 3], ["ML", 370, 798, 64, -8], ["MYSQL", 500, 820, 44, 6], ["C#", 690, 812, 48, -4],
+];
 
-  const pressKey = useCallback((key: KeyData) => {
-    setPressed((prev) => {
-      const next = new Set(prev);
-      next.add(key.id);
-      return next;
-    });
-    setActive(key);
-  }, []);
+const TAGS = LAYOUT.map(([name, x, y, size, r]) => {
+  const list = USED[name] ?? [];
+  return { name, x, y, size, r, count: list.length, neon: list.length ? NEON[list[0]] : "#FFD23F" };
+});
 
-  const releaseKey = useCallback((key: KeyData) => {
-    setPressed((prev) => {
-      const next = new Set(prev);
-      next.delete(key.id);
-      return next;
-    });
-  }, []);
+type Tag = (typeof TAGS)[number];
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      const found = keys.find((k) => k.keyboardKey === e.key.toLowerCase());
-      if (found) pressKey(found);
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [pressKey]);
+function TagText({ t, lit, flow }: { t: Tag; lit: boolean; flow?: boolean }) {
+  const size = flow ? Math.max(22, Math.round(t.size * 0.42)) : t.size;
+  const style: CSSProperties = flow
+    ? { fontSize: size, transform: `rotate(${t.r}deg)` }
+    : { left: t.x, top: t.y, fontSize: size, transform: `rotate(${t.r}deg)` };
+  if (!lit) return <span className="sk-tag" style={{ ...style, color: "rgba(255,255,255,0.08)" }}>{t.name}</span>;
+  return (
+    <span className="sk-tag" style={{ ...style, color: t.neon, textShadow: `0 0 6px ${t.neon}, 0 0 22px ${t.neon}` }}>
+      {t.name}
+      {t.count > 0 && <span className="sk-n">x{t.count}</span>}
+    </span>
+  );
+}
+
+function Torch({ scale = 1 }: { scale?: number }) {
+  return (
+    <>
+      <div className="absolute rounded-full" style={{ left: -300 * scale, top: -300 * scale, width: 600 * scale, height: 600 * scale, background: "radial-gradient(closest-side, rgba(150,80,255,0.26), rgba(110,50,220,0.1) 60%, transparent)", mixBlendMode: "screen" }} />
+      <svg width={130 * scale} height={60 * scale} viewBox="0 0 130 60" aria-hidden className="absolute" style={{ left: 170 * scale, top: 150 * scale, transform: "rotate(42deg)", transformOrigin: `0 ${30 * scale}px` }}>
+        <rect x="0" y="16" width="30" height="28" rx="4" fill="#2B2B2B" stroke="#555555" strokeWidth="2" />
+        <rect x="30" y="20" width="96" height="20" rx="6" fill="#1E1E1E" stroke="#555555" strokeWidth="2" />
+        <rect x="4" y="20" width="4" height="20" fill="#B983FF" />
+        <rect x="64" y="25" width="14" height="10" rx="2" fill="#7A3CFF" />
+      </svg>
+    </>
+  );
+}
+
+/** Desktop: the wall exactly as drawn, scaled to fit. */
+function Wall() {
+  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  const [wide, setWide] = useState(false);
+  const on = at !== null;
+  const r = wide ? 320 : 210;
+
+  const move = (e: MouseEvent<HTMLDivElement>) => {
+    const p = stagePoint(e.currentTarget, e.clientX, e.clientY, W, H);
+    setAt({ x: Math.round(p.x), y: Math.round(p.y) });
+  };
 
   return (
-    <section
-      id="skills"
-      className="relative xl:min-h-[70vh] flex flex-col items-center justify-start pt-0 xl:pt-32 pb-16 xl:pb-0 overflow-visible xl:overflow-hidden select-none bg-black [overflow-anchor:none]"
-      style={{ backgroundColor: "#000000" }}
-    >
-
-
-      {/* Header */}
-      <div className="relative z-10 mb-4 text-center xl:mb-14 mt-8 xl:mt-8">
-        <h2 className="site-title tracking-[0.15em] uppercase">
-          SKILLS
-        </h2>
-        <p className="text-xs text-blue-500 font-mono mt-3 opacity-60">
-          (click a key or press keyboard shortcut)
-        </p>
-      </div>
-
-      {/* Left angled text callout (desktop) */}
-      <div className="hidden xl:block absolute left-[18%] xl:left-[24%] top-[28rem] z-10 -rotate-[32deg] origin-left pointer-events-none w-[320px] h-[160px] [contain:strict]">
-        <h2
-          className="text-4xl font-black tracking-tight leading-none min-h-[40px]"
-          style={{
-            fontFamily: "'Georgia'",
-            color: "#fff",
-            textShadow: "0 0 30px rgba(100,160,255,0.35), 3px 3px 0 #f05032",
-          }}
-        >
-          {active?.label ?? "Git"}
-        </h2>
-        <p className="mt-2 text-white/85 font-mono text-2xl leading-none w-[320px] min-h-[80px]">
-          {active ? active.description : "the code's personal bodyguard, no cap!"}
-        </p>
-      </div>
-
-      <div
-        className="group relative z-10 xl:ml-96 keyboard-scale"
-        style={{
-          perspective: "1000px",
-          animation: typeof window !== 'undefined' && window.innerWidth < 1024 ? 'none' : "keyboardFloat 4.8s ease-in-out infinite",
-        }}
-      >
+    <ScaledStage w={W} h={H} grow={1.35}>
+      <div className="relative h-full w-full" style={{ cursor: "none" }} onMouseMove={move} onMouseLeave={() => { setAt(null); setWide(false); }} onMouseDown={() => { setWide(true); playClick(); }} onMouseUp={() => setWide(false)}>
+        <div aria-hidden className="absolute inset-0">
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit={false} />)}
+        </div>
         <div
-          className="transition-transform duration-500 ease-out"
+          aria-hidden
+          className="sk-lit absolute inset-0 pointer-events-none"
           style={{
-            transform: "rotateX(30deg) rotateY(-8deg) rotateZ(0deg)",
-            transformStyle: "preserve-3d",
+            // Holding the button down opens the beam up.
+            clipPath: on ? `circle(${r}px at ${at.x}px ${at.y}px)` : undefined,
+            transition: "clip-path 220ms cubic-bezier(0.34,1.56,0.64,1)",
+            animation: on ? "none" : "sk-wander 18s ease-in-out 1.4s infinite",
           }}
         >
-          {/* Board body */}
-          <div
-            className="rounded-2xl p-5"
-            style={{
-              background: "linear-gradient(145deg, #1a1d28 0%, #0e1018 100%)",
-              boxShadow: `
-                0 40px 100px rgba(0,0,0,0.9),
-                0 0 0 1px rgba(255,255,255,0.04),
-                inset 0 1px 0 rgba(255,255,255,0.06),
-                inset 0 -4px 0 rgba(0,0,0,0.5)
-              `,
-              transformStyle: "preserve-3d",
-              animation: "boardPulse 4.8s ease-in-out infinite",
-            }}
-          >
-            {/* Board depth bottom */}
-            <div
-              className="absolute bottom-0 left-2 right-2 rounded-b-2xl"
-              style={{
-                height: "12px",
-                background: "#050608",
-                transform: "translateY(10px) rotateX(-90deg)",
-                transformOrigin: "top center",
-              }}
-            />
-
-            <div className="flex flex-col gap-3">
-              {ROWS.map((row, ri) => (
-                <div key={ri} className="flex gap-3 justify-center">
-                  {row.map((keyId) => {
-                    const key = keys.find((k) => k.id === keyId)!;
-                    const isPressed = pressed.has(key.id);
-                    return (
-                      <KeyCap
-                        key={key.id}
-                        data={key}
-                        isPressed={isPressed}
-                        onClick={() => pressKey(key)}
-                        onMouseLeave={() => releaseKey(key)}
-                      />
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
+          <div className="absolute inset-0" style={{ background: "rgba(60,20,120,0.35)" }} />
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit />)}
+          <span className="sk-tag" style={{ left: 1150, top: 830, fontSize: 30, transform: "rotate(-4deg)", color: "#B6FF3B", textShadow: "0 0 8px #B6FF3B" }}>LG WAS HERE</span>
+        </div>
+        <div className="sk-torch left-0 top-0" style={{ transform: on ? `translate(${at.x}px, ${at.y}px)` : undefined, animation: on ? "none" : "sk-wander-at 18s ease-in-out 1.4s infinite" }}>
+          <Torch />
+        </div>
+        <div className="absolute" style={{ left: 70, top: 24, zIndex: 5 }}>
+          <SprayHeading text="SKILLS" size="120px" />
         </div>
       </div>
+    </ScaledStage>
+  );
+}
 
-      {/* Mobile caption: show key label + description below the keyboard (non-tilted) */}
-      <div className="block xl:hidden w-full px-6 text-center z-20 -mt-20 md:mt-8">
-        <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-          {active?.label ?? "Git"}
-        </h3>
-        <p className="mt-2 text-sm text-white/80 max-w-xl mx-auto">
-          {active ? active.description : "the code's personal bodyguard, no cap!"}
-        </p>
+/** Phones: the tags in a loose pile; the torch wanders, and a tap points it. */
+function Pile() {
+  const box = useRef<HTMLDivElement>(null);
+  const timer = useRef<number>();
+  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const point = (e: PointerEvent<HTMLDivElement>) => {
+    const r = box.current?.getBoundingClientRect();
+    if (!r) return;
+    setAt({ x: Math.round(e.clientX - r.left), y: Math.round(e.clientY - r.top) });
+    playClick();
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setAt(null), 3500);
+  };
+
+  const on = at !== null;
+  return (
+    <div className="px-4 pb-16 pt-10">
+      <SprayHeading text="SKILLS" size="clamp(56px, 16vw, 96px)" />
+      <div ref={box} className="relative mt-6" onPointerDown={point}>
+        <div aria-hidden className="sk-flow text-center">
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit={false} flow />)}
+        </div>
+        <div
+          aria-hidden
+          className="sk-lit sk-flow absolute inset-0 text-center pointer-events-none"
+          style={{ clipPath: on ? `circle(120px at ${at.x}px ${at.y}px)` : undefined, animation: on ? "none" : "sk-wander-pct 14s ease-in-out infinite", background: "rgba(60,20,120,0.35)" }}
+        >
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit flow />)}
+        </div>
+        <div className="sk-torch" style={on ? { left: at.x, top: at.y } : { animation: "sk-wander-pct-at 14s ease-in-out infinite" }}>
+          <Torch scale={0.55} />
+        </div>
       </div>
+    </div>
+  );
+}
 
-
-
-      <style>{`
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.2; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.4); }
-        }
-        @keyframes keyboardFloat {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes boardPulse {
-          0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 255, 255, 0)); }
-          50% { filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.05)); }
-        }
-      `}</style>
+const Skills = () => {
+  const desktop = useMediaQuery("(min-width: 900px)");
+  return (
+    <section id="skills" aria-label="Skills" className="sk-root">
+      <p className="sr-only">
+        Skills: {TAGS.map((t) => t.name).join(", ")}.
+      </p>
+      {desktop ? <Wall /> : <Pile />}
     </section>
   );
-}
+};
 
-function KeyCap({
-  data,
-  isPressed,
-  onClick,
-  onMouseLeave,
-}: {
-  data: KeyData;
-  isPressed: boolean;
-  onClick: () => void;
-  onMouseLeave: () => void;
-}) {
-  const depth = 6;
-
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={onClick}
-      onMouseLeave={onMouseLeave}
-      className="relative focus:outline-none"
-      style={{
-        width: 68,
-        height: 68,
-        transformStyle: "preserve-3d",
-        transform: isPressed
-          ? `translateY(${depth}px)`
-          : "translateY(0px)",
-        transition: "transform 0.08s cubic-bezier(0.25,0.46,0.45,0.94)",
-      }}
-    >
-      {/* Side faces for 3D depth */}
-      {/* Bottom face */}
-      <div
-        className="absolute inset-x-0 bottom-0 rounded-b-lg"
-        style={{
-          height: depth,
-          background: data.shadowColor,
-          transform: `translateY(${depth}px) rotateX(-90deg)`,
-          transformOrigin: "top center",
-          backfaceVisibility: "hidden",
-        }}
-      />
-      {/* Left side */}
-      <div
-        className="absolute top-0 bottom-0 left-0"
-        style={{
-          width: depth,
-          background: `linear-gradient(to right, ${data.shadowColor}, ${data.sideColor})`,
-          transform: `translateX(-${depth}px) rotateY(90deg)`,
-          transformOrigin: "right center",
-          backfaceVisibility: "hidden",
-          borderRadius: "4px 0 0 4px",
-        }}
-      />
-      {/* Right side */}
-      <div
-        className="absolute top-0 bottom-0 right-0"
-        style={{
-          width: depth,
-          background: data.sideColor,
-          transform: `translateX(${depth}px) rotateY(-90deg)`,
-          transformOrigin: "left center",
-          backfaceVisibility: "hidden",
-          borderRadius: "0 4px 4px 0",
-        }}
-      />
-      {/* Top face (main keycap surface) */}
-      <div
-        className="absolute inset-0 rounded-xl flex flex-col items-center justify-center gap-1"
-        style={{
-          background: `linear-gradient(145deg, ${lighten(data.color, 30)} 0%, ${data.color} 60%, ${darken(data.color, 10)} 100%)`,
-          boxShadow: isPressed
-            ? `inset 0 2px 6px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)`
-            : `
-              0 0 0 1px rgba(255,255,255,0.08),
-              inset 0 1px 0 rgba(255,255,255,0.15),
-              inset 0 -2px 0 rgba(0,0,0,0.3),
-              0 0 20px rgba(0,0,0,0.4)
-            `,
-          transition: "box-shadow 0.08s",
-        }}
-      >
-        {/* Keycap top sheen */}
-        <div
-          className="absolute inset-x-2 top-1.5 rounded-lg"
-          style={{
-            height: "30%",
-            background: "linear-gradient(to bottom, rgba(255,255,255,0.12), transparent)",
-            pointerEvents: "none",
-          }}
-        />
-        {data.icon}
-      </div>
-    </button>
-  );
-}
-
-function lighten(hex: string, amount: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.min(255, (num >> 16) + amount);
-  const g = Math.min(255, ((num >> 8) & 0xff) + amount);
-  const b = Math.min(255, (num & 0xff) + amount);
-  return `rgb(${r},${g},${b})`;
-}
-
-function darken(hex: string, amount: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.max(0, (num >> 16) - amount);
-  const g = Math.max(0, ((num >> 8) & 0xff) - amount);
-  const b = Math.max(0, (num & 0xff) - amount);
-  return `rgb(${r},${g},${b})`;
-}
+export default Skills;

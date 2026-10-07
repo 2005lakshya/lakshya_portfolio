@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 export default {
   darkMode: ["class"],
@@ -103,5 +104,11 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [
+    require("tailwindcss-animate"),
+    // `short:` is a phone on its side: wide enough for the desktop layout, but with little height to spare. A variant
+    // rather than a screen (a screen given as a media query turns off the min-[...] and max-[...] variants), and one
+    // step more specific than `md:`, which it overrides when both apply.
+    plugin(({ addVariant }) => { addVariant("short", "@media (max-height: 559px) { :root & }"); }),
+  ],
 } satisfies Config;

@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
-import { Home, User, Code2, FolderDot, Briefcase, Mail, Award, Menu, X } from "lucide-react";
+import { Home, User, Code2, FolderDot, Briefcase, Mail, Award, Menu, X, Volume2, VolumeX } from "lucide-react";
+import { getSoundState, setSoundEnabled, subscribeSound } from "@/components/projects/crate/crateSounds";
+
+/** The site-wide sound switch; every effect on the page listens to it. */
+function useSoundSwitch() {
+  const [on, setOn] = useState(() => getSoundState().enabled);
+  useEffect(() => subscribeSound((s) => setOn(s.enabled)), []);
+  return [on, () => setSoundEnabled(!on)] as const;
+}
 
 const navItems = [
   { label: "Home", href: "#home", icon: Home },
@@ -57,6 +65,8 @@ function DockItem({ item, mouseX }: { item: typeof navItems[0]; mouseX: any }) {
 const Navbar = () => {
   const mouseX = useMotionValue(Infinity);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [soundOn, toggleSound] = useSoundSwitch();
+  const SoundIcon = soundOn ? Volume2 : VolumeX;
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -93,6 +103,16 @@ const Navbar = () => {
           {navItems.map((item) => (
             <DockItem key={item.label} item={item} mouseX={mouseX} />
           ))}
+          <span aria-hidden className="mx-0.5 mb-1.5 h-7 w-px self-end bg-white/15" />
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? "Turn sound off" : "Turn sound on"}
+            className="mb-0.5 flex h-9 w-9 items-center justify-center self-end rounded-full border border-white/20 bg-white/10 text-white/80 backdrop-blur-md transition-colors hover:bg-white/20 hover:text-white"
+          >
+            <SoundIcon className="h-4 w-4" />
+          </button>
         </div>
       </motion.header>
 
@@ -128,6 +148,15 @@ const Navbar = () => {
                   </a>
                 );
               })}
+              <button
+                type="button"
+                onClick={toggleSound}
+                aria-pressed={soundOn}
+                className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/10 text-white/80 hover:text-white transition-all text-left"
+              >
+                <SoundIcon size={20} />
+                <span className="font-medium text-sm">{soundOn ? "Sound on" : "Sound off"}</span>
+              </button>
             </motion.div>
           )}
         </AnimatePresence>
