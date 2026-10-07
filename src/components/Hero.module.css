@@ -8,6 +8,9 @@
   height: 100vh;
   min-height: min(640px, 100vh);
   position: relative;
+  /* Keeps the stickers' z-indexes inside the hero, so the About page can be laid over it. */
+  z-index: 1;
+  isolation: isolate;
   background-color: #000;
   text-align: left;
   font-size: 96px;

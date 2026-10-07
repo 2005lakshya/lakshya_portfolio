@@ -1,0 +1,296 @@
+/*
+ * The way in: a poster for Lakshya over the 3D house (his name, what he does, the door), and while it loads, a
+ * blueprint of the same house drawing itself where the real one will appear. Prefixed land-. Three layouts, set by
+ * data-mode on the roots: wide (the words in a column on the left, the house on the right), tall (a phone held
+ * upright: the name above the house, the buttons below), short (a phone on its side: a slim column and the house).
+ */
+
+#room { --p: 0.04; }
+
+/* Fonts as classes that beat the site's `button { font-family: Inter !important }`. */
+#room .land-marker { font-family: 'Permanent Marker', cursive !important; font-weight: 400; letter-spacing: normal; }
+#room .land-anton { font-family: Anton, Impact, sans-serif !important; font-weight: 400; }
+#room .land-mono { font-family: 'Space Mono', monospace !important; font-weight: 700; }
+
+/* ---------- the blueprint (loading) ---------- */
+#room .land-bp { position: absolute; inset: 0; z-index: 40; pointer-events: none; }
+#room .land-bp-bg {
+  position: absolute; inset: 0; background-color: #1D2C44;
+  background-image:
+    linear-gradient(to right, rgba(244, 244, 244, 0.11) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(244, 244, 244, 0.11) 1px, transparent 1px),
+    linear-gradient(to right, rgba(244, 244, 244, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(244, 244, 244, 0.05) 1px, transparent 1px),
+    radial-gradient(ellipse at 62% 48%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.38) 100%);
+  background-size: 200px 200px, 200px 200px, 40px 40px, 40px 40px, 100% 100%;
+  transition: opacity 0.9s ease;
+}
+#room .land-bp:not([data-mode=wide]) .land-bp-bg { background-size: 160px 160px, 160px 160px, 32px 32px, 32px 32px, 100% 100%; }
+#room .land-bp svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; transform-origin: var(--bp-cx) var(--bp-cy); transition: opacity 0.65s ease 0.15s, transform 0.65s ease 0.15s; }
+#room .land-bp-ghost { opacity: 0.16; }
+#room .land-bp-lit { opacity: 0.92; clip-path: inset(calc(var(--bp-top) + (1 - var(--p)) * var(--bp-h)) 0 0 0); }
+#room .land-bp svg.land-bp-lit { transition: clip-path 0.3s ease-out, opacity 0.65s ease 0.15s, transform 0.65s ease 0.15s; }
+#room .land-bp-plot {
+  position: absolute; height: 2px; left: calc(var(--bp-left) - 12px); width: calc(var(--bp-w) + 24px);
+  top: calc(var(--bp-top) + (1 - var(--p)) * var(--bp-h) - 1px);
+  background: #FFD23F; box-shadow: 0 0 12px 2px rgba(255, 210, 63, 0.55);
+  transition: top 0.3s ease-out, opacity 0.4s ease;
+}
+#room .land-bp-title {
+  position: absolute; right: 24px; bottom: 24px; width: 300px; display: grid; grid-template-columns: 96px 1fr;
+  border: 1.5px solid rgba(244, 244, 244, 0.45); font-size: 10px; line-height: 1.3; letter-spacing: 1.5px;
+  text-transform: uppercase; color: rgba(244, 244, 244, 0.75); transition: opacity 0.5s ease;
+}
+#room .land-bp-title > span { padding: 6px 10px; border-top: 1px solid rgba(244, 244, 244, 0.25); }
+#room .land-bp-title > span:nth-child(-n+2) { border-top: 0; }
+#room .land-bp-title > span:nth-child(odd) { border-right: 1px solid rgba(244, 244, 244, 0.25); }
+/* ready: the drawing dissolves into the house drawn underneath it */
+#room .land-bp[data-ready="1"] .land-bp-bg,
+#room .land-bp[data-ready="1"] .land-bp-title,
+#room .land-bp[data-ready="1"] .land-bp-plot { opacity: 0; }
+#room .land-bp[data-ready="1"] svg { opacity: 0; transform: scale(1.015); }
+
+/* ---------- the poster ---------- */
+#room .land-root { position: absolute; inset: 0; z-index: 45; pointer-events: none; --g: clamp(24px, 4.4vw, 80px); --scrim: 8, 10, 14; }
+#room .land-root[data-mode=wide] { --S: clamp(56px, min(10vw, 17svh), 176px); --cw: min(max(calc(var(--S) * 3.3), 380px), 46vw); }
+#room .land-root[data-mode=short] { --S: clamp(48px, min(10vw, 17svh), 96px); --cw: 320px; }
+#room .land-root[data-mode=tall] { --S: min(27vw, 13svh); }
+#room .land-root[data-mode=tall][data-squat="1"] { --S: min(27vw, 12svh); }
+@supports not (height: 1svh) {
+  #room .land-root[data-mode=wide] { --S: clamp(56px, min(10vw, 17vh), 176px); }
+  #room .land-root[data-mode=short] { --S: clamp(48px, min(10vw, 17vh), 96px); }
+  #room .land-root[data-mode=tall] { --S: min(27vw, 13vh); }
+  #room .land-root[data-mode=tall][data-squat="1"] { --S: min(27vw, 12vh); }
+}
+
+/* the wrappers carry the scrims: plain gradients (no blur over the 3D), dark enough under every line of text */
+#room .land-col {
+  position: absolute; top: 0; bottom: 0; left: 0; display: flex; align-items: center; box-sizing: border-box;
+  padding: 64px 120px 24px var(--g); overflow-y: auto; scrollbar-width: none;
+  background: linear-gradient(90deg, rgba(var(--scrim), 0.8) 0, rgba(var(--scrim), 0.62) calc(100% - 120px), rgba(var(--scrim), 0) 100%);
+}
+#room .land-col > [data-land] { width: var(--cw); display: flex; flex-direction: column; max-height: 100%; }
+#room [data-mode=short] .land-col {
+  padding: 14px 96px 12px max(24px, env(safe-area-inset-left)); align-items: stretch;
+  background: linear-gradient(90deg, rgba(var(--scrim), 0.82) 0, rgba(var(--scrim), 0.66) calc(100% - 96px), rgba(var(--scrim), 0) 100%);
+}
+#room [data-mode=short] .land-col > [data-land] { justify-content: space-between; }
+#room .land-top {
+  position: absolute; left: 0; right: 0; top: 0; box-sizing: border-box; padding: 68px 16px 56px;
+  background: linear-gradient(180deg, rgba(var(--scrim), 0.8) 0, rgba(var(--scrim), 0.62) calc(100% - 56px), rgba(var(--scrim), 0) 100%);
+}
+#room [data-squat="1"] .land-top { padding-top: 64px; }
+#room .land-bot {
+  position: absolute; left: 0; right: 0; bottom: 0; box-sizing: border-box; padding: 48px 16px max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(0deg, rgba(var(--scrim), 0.78) 0, rgba(var(--scrim), 0.62) calc(100% - 48px), rgba(var(--scrim), 0) 100%);
+}
+#room .land-bot > [data-land] { max-width: 520px; margin: 0 auto; }
+#room .land-tr { position: absolute; top: 0; right: 0; width: 560px; max-width: 60%; height: 160px; background: radial-gradient(100% 100% at 100% 0, rgba(var(--scrim), 0.5), rgba(var(--scrim), 0)); }
+#room [data-mode=tall] .land-tr, #room [data-mode=short] .land-tr { display: none; }
+
+/* the name: a red HI, I'M sticker, LAKSHYA in tall Anton, GUPTA sprayed over its foot */
+#room .land-h1 { position: relative; display: flex; flex-direction: column; width: max-content; margin: calc(var(--S) * 0.26) 0 0; font-size: var(--S); font-weight: 400; letter-spacing: normal; line-height: 1; }
+#room .land-hi {
+  position: absolute; left: calc(var(--S) * -0.05); top: calc(var(--S) * -0.26); z-index: 1; --r: -6deg;
+  font-size: max(12px, calc(var(--S) * 0.16)); line-height: 1; padding: 0.32em 0.62em 0.2em; border-radius: 8px;
+  background: #E3171C; color: #fff; text-transform: uppercase; white-space: nowrap; transform: rotate(var(--r)); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45);
+}
+#room .land-first {
+  display: block; font-size: var(--S); line-height: 0.86; letter-spacing: 0.01em; color: #F4F4F4; text-transform: uppercase; white-space: nowrap;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.18), 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+#room .land-last {
+  position: relative; display: block; align-self: flex-end; font-size: calc(var(--S) * 0.6); line-height: 1.1;
+  margin: calc(var(--S) * -0.2) calc(var(--S) * -0.04) 0 0; color: #F4F4F4; text-transform: uppercase; white-space: nowrap;
+  transform: rotate(-4deg); transform-origin: 100% 50%;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8), 0 0 14px rgba(255, 255, 255, 0.35), 0 0 34px rgba(255, 255, 255, 0.14), 0 3px 0 rgba(0, 0, 0, 0.28), 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+#room .land-drip { position: absolute; left: var(--x); top: var(--y); width: var(--w); height: var(--h); border-radius: 0 0 3px 3px; background: #EDEDED; transform-origin: top; }
+#room .land-role {
+  margin: calc(var(--S) * 0.12) 0 0; font-size: clamp(14px, calc(var(--S) * 0.2), 32px); line-height: 1.15; letter-spacing: 0.04em;
+  color: #F4F4F4; text-transform: uppercase; white-space: nowrap; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.6);
+}
+#room .land-role i { font-style: normal; color: rgba(244, 244, 244, 0.5); }
+#room .land-stand { margin: 12px 0 0; font: 500 clamp(15px, 1.2vw, 18px) / 1.5 Inter, sans-serif; color: #F4F4F4; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.7); }
+#room .land-credits {
+  margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: 11.5px; line-height: 18px; letter-spacing: 2px;
+  text-transform: uppercase; color: #F4F4F4; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+}
+#room .land-credits li { display: flex; align-items: center; white-space: nowrap; }
+#room .land-credits li::before { content: ""; width: 6px; height: 6px; background: #E3171C; margin-right: 10px; flex: none; }
+#room [data-mode=tall] .land-credits { margin-top: 8px; font-size: 10.5px; line-height: 16px; letter-spacing: 1px; gap: 0; }
+/* lines there's no room for are hidden from the eye only: a screen reader still reads them */
+#room [data-mode=tall] .land-credits li:nth-child(3), #room [data-mode=short] .land-credits, #room [data-mode=short] .land-stand, #room [data-mode=tall] .land-stand { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-height: 779px) { #room [data-mode=wide] .land-stand, #room [data-mode=tall] .land-credits { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+@media (max-height: 699px) { #room [data-mode=wide] .land-credits { position: absolute; width: 1px; height: 1px; margin: 0; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+
+/* ---------- the way in: the progress bar, then COME ON IN in its place ---------- */
+#room .land-cta { position: relative; display: flex; align-items: center; gap: 12px; margin-top: 28px; height: 60px; width: var(--cw); container-type: inline-size; pointer-events: auto; }
+#room [data-mode=tall] .land-cta { margin-top: 0; height: 56px; width: 100%; gap: 10px; }
+#room [data-mode=tall][data-squat="1"] .land-cta { height: 52px; }
+#room [data-mode=short] .land-cta { margin-top: 0; height: 48px; gap: 8px; }
+
+#room .land-prog {
+  position: absolute; inset: 0; border-radius: 12px; overflow: hidden;
+  background-color: rgba(11, 11, 12, 0.6);
+  background-image: repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.07) 0 10px, transparent 10px 20px);
+  background-size: 28.28px 28.28px; box-shadow: inset 0 0 0 2px rgba(244, 244, 244, 0.7);
+  animation: landStripes 1s linear infinite; transition: opacity 0.2s ease;
+}
+#room .land-root[data-ready="1"] .land-prog { opacity: 0; pointer-events: none; }
+#room .land-prog-fill { position: absolute; inset: 0; background: #FFD23F; transform-origin: left; transition: transform 0.3s ease-out; }
+#room .land-prog-label {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 3px 20px 0;
+  color: #F4F4F4; font-size: clamp(16px, 1.35vw, 19px); line-height: 1; text-transform: uppercase;
+}
+#room [data-mode=tall] .land-prog-label { font-size: clamp(14px, 4.2vw, 18px); padding: 3px 16px 0; }
+#room [data-mode=short] .land-prog-label { font-size: 15px; }
+#room .land-prog-label.ink { color: #111; clip-path: inset(0 calc((1 - var(--p)) * 100%) 0 0); transition: clip-path 0.3s ease-out; }
+#room .land-prog-step { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#room .land-prog-pct { flex: none; font-size: 13px; letter-spacing: 1.5px; font-variant-numeric: tabular-nums; }
+
+#room .land-knock { position: relative; display: flex; height: 100%; animation: landKnock 8s ease-in-out 4s infinite; }
+#room .land-knock:hover, #room .land-knock:focus-within { animation-play-state: paused; }
+#room .land-go {
+  --rot: -1.5deg; --sh: 0 10px 26px rgba(0, 0, 0, 0.5), inset 0 -3px 0 rgba(0, 0, 0, 0.18);
+  height: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 4px 28px 0; border: 0; border-radius: 12px;
+  background: #FFD23F; color: #111; font-size: clamp(20px, 1.6vw, 26px); line-height: 1; white-space: nowrap; text-transform: uppercase;
+  box-shadow: var(--sh); transform: rotate(var(--rot)); animation: landGo 0.42s cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+#room .land-go svg { margin-top: -3px; }
+#room [data-mode=tall] .land-knock, #room [data-mode=short] .land-knock { flex: 1; }
+#room [data-mode=tall] .land-go { --rot: -1deg; width: 100%; font-size: 22px; padding: 4px 16px 0; }
+#room [data-mode=short] .land-go { width: 100%; font-size: 19px; padding: 4px 16px 0; }
+#room .land-skip {
+  --rot: 1deg; --sh: inset 0 0 0 2px #F4F4F4, 0 8px 22px rgba(0, 0, 0, 0.45);
+  position: relative; height: 48px; padding: 3px 20px 0; border: 0; border-radius: 10px; background: rgba(17, 17, 17, 0.82); color: #F4F4F4;
+  font-size: 17px; line-height: 1; white-space: nowrap; text-transform: uppercase; box-shadow: var(--sh); transform: rotate(var(--rot));
+  animation: landFade 0.3s ease 0.12s backwards;
+}
+#room [data-mode=tall] .land-skip { height: 100%; width: 96px; flex: none; padding: 3px 0 0; font-size: 18px; }
+#room [data-mode=short] .land-skip { height: 100%; width: 84px; flex: none; padding: 3px 0 0; font-size: 16px; }
+#room .land-skip .s { display: none; }
+#room [data-mode=tall] .land-skip .l, #room [data-mode=short] .land-skip .l { display: none; }
+#room [data-mode=tall] .land-skip .s, #room [data-mode=short] .land-skip .s { display: inline; }
+@container (max-width: 439px) { #room [data-mode=wide] .land-skip .l { display: none; } #room [data-mode=wide] .land-skip .s { display: inline; } }
+
+/* the section stickers, for anyone in a hurry */
+#room .land-jump { margin-top: 24px; pointer-events: auto; }
+#room .land-jump-label { margin: 0 0 10px; font-size: 11px; line-height: 16px; letter-spacing: 3px; text-transform: uppercase; color: #F4F4F4; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7); }
+#room [data-mode=tall] .land-jump { margin-top: 12px; }
+#room [data-mode=tall] .land-jump-label { font-size: 10px; line-height: 14px; letter-spacing: 2.5px; text-align: center; margin-bottom: 8px; }
+#room [data-mode=short] .land-jump { margin-top: 10px; }
+#room [data-mode=short] .land-jump-label, #room [data-squat="1"] .land-jump-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+#room .land-rows { display: grid; gap: 10px; }
+#room .land-rows > div { display: flex; gap: 10px; }
+#room [data-mode=tall] .land-rows { gap: 8px; }
+#room [data-mode=tall] .land-rows > div { gap: 6px; justify-content: center; }
+#room [data-mode=short] .land-rows, #room [data-mode=short] .land-rows > div { gap: 6px; }
+#room .land-chip {
+  --sh: 0 6px 16px rgba(0, 0, 0, 0.4);
+  height: 40px; padding: 3px 14px 0; border: 0; border-radius: 9px; font-size: 15px; line-height: 1; white-space: nowrap; text-transform: uppercase;
+  box-shadow: var(--sh); transform: rotate(var(--rot));
+}
+#room .land-chip[aria-pressed="true"] { outline: 3px solid #F4F4F4; outline-offset: 3px; }
+#room [data-mode=tall] .land-chip { padding: 3px 10px 0; font-size: clamp(12.5px, 3.7vw, 15px); }
+#room [data-squat="1"] .land-chip, #room [data-mode=short] .land-chip { height: 36px; }
+#room [data-mode=short] .land-chip { padding: 3px 10px 0; font-size: 13px; }
+
+/* lift on hover, press on click: the same pattern for every sticker, each keeping its own tilt */
+#room .land-go, #room .land-skip, #room .land-chip, #room .land-resume { transition: transform 0.12s ease, box-shadow 0.12s ease; }
+@media (hover: hover) and (pointer: fine) {
+  #room .land-go:hover, #room .land-skip:hover, #room .land-chip:hover, #room .land-resume:hover { transform: translateY(-2px) rotate(calc(var(--rot) * 1.5)); }
+}
+#room .land-go:active, #room .land-skip:active, #room .land-chip:active, #room .land-resume:active { transform: translateY(1px) rotate(var(--rot)); }
+
+/* ---------- links: GitHub, LinkedIn, the résumé ---------- */
+#room .land-util { position: absolute; display: flex; align-items: center; gap: 10px; pointer-events: auto; top: 24px; right: var(--g); }
+#room [data-mode=tall] .land-util { top: max(12px, env(safe-area-inset-top)); left: 16px; right: 16px; justify-content: space-between; }
+#room [data-mode=short] .land-util { top: 12px; right: 12px; gap: 8px; }
+#room .land-util > span { display: flex; gap: 8px; }
+#room .land-pill {
+  --sh: 0 0 0 transparent; height: 36px; padding: 0 14px; display: inline-flex; align-items: center; gap: 6px; border-radius: 999px;
+  background: rgba(11, 11, 12, 0.72); border: 1px solid #262626; color: #F4F4F4; font-size: 12px; letter-spacing: 2px; text-decoration: none; text-transform: uppercase;
+  transition: background 0.15s, color 0.15s;
+}
+#room .land-pill:hover { background: #F4F4F4; color: #111; }
+#room .land-round {
+  --sh: 0 8px 22px rgba(0, 0, 0, 0.45); width: 44px; height: 44px; display: grid; place-items: center; border-radius: 999px;
+  background: rgba(17, 17, 17, 0.85); color: #F4F4F4; box-shadow: var(--sh);
+}
+#room [data-mode=short] .land-round { width: 36px; height: 36px; }
+#room .land-resume {
+  --rot: 2deg; --sh: 0 8px 22px rgba(0, 0, 0, 0.45);
+  height: 40px; padding: 3px 16px 0; display: inline-flex; align-items: center; gap: 6px; border-radius: 10px; background: #F4F4F4; color: #111;
+  font-size: 16px; line-height: 1; text-decoration: none; text-transform: uppercase; box-shadow: var(--sh); transform: rotate(var(--rot));
+}
+#room [data-mode=tall] .land-resume { font-size: 15px; padding: 3px 14px 0; }
+#room [data-mode=short] .land-resume { height: 36px; font-size: 14px; padding: 3px 12px 0; }
+
+/* a ring that shows on sky, scrim, yellow and white alike */
+#room .land-focus:focus-visible { outline: 2px solid #111; outline-offset: 2px; box-shadow: 0 0 0 6px #F4F4F4, var(--sh, 0 0 0 transparent); }
+
+/* ---------- KNOCK KNOCK! pinned to the real front door (the scene moves its anchor) ---------- */
+#room .land-door { position: absolute; left: 0; top: 0; width: 0; height: 0; visibility: hidden; transition: opacity 0.15s ease; }
+#room .land-root[data-ready="1"] .land-door[data-on="1"] { visibility: visible; }
+#room .land-root[data-walking="1"] .land-door { opacity: 0; }
+#room .land-door-in { position: absolute; right: 10px; bottom: 14px; display: flex; align-items: flex-end; pointer-events: auto; animation: landBob 2.6s ease-in-out 1.1s infinite; transition: scale 0.2s ease; }
+#room .land-root[data-cue="1"] .land-door-in { scale: 1.08; }
+#room .land-door-tag {
+  background: #FFD23F; color: #111; font-size: 18px; line-height: 1; padding: 9px 14px 7px; border-radius: 10px; white-space: nowrap;
+  text-transform: uppercase; transform: rotate(-6deg); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.45); animation: landPop 0.42s ease 0.6s backwards;
+}
+#room [data-mode=tall] .land-door-tag { font-size: 15px; }
+#room [data-mode=short] .land-door-tag { font-size: 14px; }
+#room .land-door-in svg { width: 34px; height: 30px; margin: 0 -22px -12px 2px; overflow: visible; filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6)); animation: landFade 0.3s ease 0.9s backwards; }
+#room .land-door-in path { fill: none; stroke: #FFD23F; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- arriving: everything comes on in turn (once; not again when a phone turns) ---------- */
+#room .land-first.land-in { animation: landRise 0.52s cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
+#room .land-hi.land-in { animation: landStamp 0.38s ease 0.18s backwards; }
+#room .land-last.land-in { animation: landSpray 0.56s cubic-bezier(0.4, 0, 0.2, 1) 0.3s backwards; }
+#room .land-drip.land-in { animation: landDrip 0.9s ease-in 0.85s backwards; }
+#room .land-drip.land-in + .land-drip.land-in { animation-delay: 1.03s; }
+#room .land-role.land-in { animation: landUp 0.38s ease 0.35s backwards; }
+#room .land-stand.land-in { animation: landUp 0.38s ease 0.41s backwards; }
+#room .land-credits.land-in { animation: landUp 0.38s ease 0.47s backwards; }
+#room .land-cta.land-in { animation: landUp 0.38s ease 0.4s backwards; }
+#room .land-jump.land-in { animation: landUp 0.38s ease 0.46s backwards; }
+#room .land-util.land-in { animation: landFade 0.3s ease backwards; }
+#room .land-root[data-settled="1"] .land-in { animation: none; }
+
+/* ---------- going in: the poster clears, the walk takes over ---------- */
+#room .land-fade { transition: opacity 0.38s ease-in, transform 0.38s ease-in; }
+#room .land-col, #room .land-top, #room .land-bot, #room .land-tr, #room .land-util { transition: opacity 0.7s ease; }
+#room .land-root[data-walking="1"] .land-fade { opacity: 0; transform: translateY(-12px); }
+#room .land-root[data-walking="1"] .land-bot .land-fade { transform: translateY(12px); }
+#room .land-root[data-walking="1"] .land-col, #room .land-root[data-walking="1"] .land-top, #room .land-root[data-walking="1"] .land-bot,
+#room .land-root[data-walking="1"] .land-tr, #room .land-root[data-walking="1"] .land-util { opacity: 0; }
+#room .land-walkskip {
+  --sh: inset 0 0 0 2px #F4F4F4, 0 8px 22px rgba(0, 0, 0, 0.45);
+  position: absolute; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 46; height: 44px; padding: 3px 16px 0;
+  display: inline-flex; align-items: center; gap: 4px; border: 0; border-radius: 999px; background: rgba(17, 17, 17, 0.85); color: #F4F4F4;
+  font-size: 16px; line-height: 1; text-transform: uppercase; box-shadow: var(--sh); animation: landFade 0.3s ease 0.5s backwards;
+}
+
+@keyframes landStripes { to { background-position: 28.28px 0; } }
+@keyframes landRise { from { opacity: 0; transform: translateY(0.18em); } }
+@keyframes landStamp { 0% { opacity: 0; transform: scale(1.6) rotate(-14deg); } 60% { opacity: 1; transform: scale(0.94) rotate(var(--r)); } 80% { transform: scale(1.03) rotate(var(--r)); } 100% { transform: rotate(var(--r)); } }
+@keyframes landSpray { from { clip-path: inset(-20% 100% -20% -5%); filter: blur(3px); } to { clip-path: inset(-20% -5% -20% -5%); filter: blur(0); } }
+@keyframes landDrip { from { transform: scaleY(0); } }
+@keyframes landUp { from { opacity: 0; transform: translateY(12px); } }
+@keyframes landFade { from { opacity: 0; } }
+@keyframes landGo { 0% { opacity: 0; transform: scale(1.22) rotate(var(--rot)); } 60% { opacity: 1; transform: scale(0.97) rotate(var(--rot)); } 100% { transform: rotate(var(--rot)); } }
+@keyframes landKnock { 0%, 88%, 100% { transform: none; } 90% { transform: rotate(-3deg) translateY(-1px); } 92% { transform: rotate(1.5deg); } 94% { transform: rotate(-3deg) translateY(-1px); } 96% { transform: none; } }
+@keyframes landBob { 50% { transform: translateY(-3px); } }
+@keyframes landPop { 0% { opacity: 0; transform: scale(0.6) rotate(-14deg); } 70% { opacity: 1; transform: scale(1.06) rotate(-4deg); } 100% { transform: rotate(-6deg); } }
+
+@media (prefers-reduced-motion: reduce) {
+  #room [class*="land-"] { animation: none !important; }
+  #room .land-bp-lit, #room .land-bp-plot, #room .land-prog-fill, #room .land-prog-label.ink { transition: none; }
+  #room .land-bp svg, #room .land-bp svg.land-bp-lit { transform: none !important; transition: opacity 0.2s ease; }
+  #room .land-bp-bg, #room .land-bp-title, #room .land-prog { transition: opacity 0.2s ease; }
+  #room .land-fade, #room .land-col, #room .land-top, #room .land-bot, #room .land-tr, #room .land-util { transition: opacity 0.2s ease; }
+  #room .land-root[data-walking="1"] .land-fade { transform: none; }
+  #room .land-go, #room .land-skip, #room .land-chip, #room .land-resume { transform: none !important; }
+}
