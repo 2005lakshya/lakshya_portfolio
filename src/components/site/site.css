@@ -1,0 +1,19 @@
+/* Shared pieces for the redesigned sections. Everything is prefixed st- so it
+   cannot collide with the rest of the site's styles. */
+
+.st-spray {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: #f4f4f4;
+  text-shadow: 0 0 2px rgba(255, 255, 255, 0.8), 0 0 14px rgba(255, 255, 255, 0.35), 0 0 34px rgba(255, 255, 255, 0.14);
+}
+
+.st-marker {
+  font-family: "Permanent Marker", cursive;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: #111111;
+}
+
+.st-drip { transform-origin: top; }

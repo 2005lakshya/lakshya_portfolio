@@ -1,0 +1,46 @@
+/* Skills: tags on a black wall that only show under a UV torch. Prefixed sk-. */
+
+.sk-root { position: relative; overflow: hidden; background: #000; color: #f4f4f4; }
+
+.sk-tag { position: absolute; white-space: nowrap; line-height: 1; font-family: "Permanent Marker", cursive; }
+.sk-flow .sk-tag { position: relative; display: inline-block; margin: 6px 14px; }
+.sk-n { position: absolute; right: -30px; top: -10px; font-family: Anton, Impact, sans-serif; font-size: 22px; color: #ff3b3e; text-shadow: 0 0 8px #ff3b3e; }
+.sk-flow .sk-n { right: -20px; font-size: 16px; }
+
+@keyframes sk-hum { 0%, 100% { opacity: 1; } 50% { opacity: 0.86; } }
+.sk-lit .sk-tag { animation: sk-hum 2.4s ease-in-out infinite; }
+
+/* The beam wanders on its own until the visitor takes the torch. */
+@keyframes sk-wander {
+  0%, 100% { clip-path: circle(210px at 300px 300px); }
+  22% { clip-path: circle(210px at 900px 250px); }
+  45% { clip-path: circle(210px at 1150px 560px); }
+  68% { clip-path: circle(210px at 620px 700px); }
+  86% { clip-path: circle(210px at 240px 620px); }
+}
+@keyframes sk-wander-at {
+  0%, 100% { transform: translate(300px, 300px); }
+  22% { transform: translate(900px, 250px); }
+  45% { transform: translate(1150px, 560px); }
+  68% { transform: translate(620px, 700px); }
+  86% { transform: translate(240px, 620px); }
+}
+/* Phones: the same walk, in percentages of whatever height the tags take up. */
+@keyframes sk-wander-pct {
+  0%, 100% { clip-path: circle(120px at 25% 20%); }
+  25% { clip-path: circle(120px at 75% 35%); }
+  50% { clip-path: circle(120px at 30% 55%); }
+  75% { clip-path: circle(120px at 70% 80%); }
+}
+@keyframes sk-wander-pct-at {
+  0%, 100% { left: 25%; top: 20%; }
+  25% { left: 75%; top: 35%; }
+  50% { left: 30%; top: 55%; }
+  75% { left: 70%; top: 80%; }
+}
+
+.sk-torch { position: absolute; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sk-lit .sk-tag { animation: none; }
+}

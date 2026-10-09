@@ -6,9 +6,9 @@ const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="py-12 border-t border-border">
+    <footer className="py-12 border-t border-white/10 bg-black">
       <div className="container px-6">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* Main footer content */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8">
             {/* Logo/Name */}
@@ -17,11 +17,9 @@ const Footer = () => {
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="font-mono text-lg"
+              className="text-lg font-bold tracking-tighter text-white"
             >
-              <span className="text-primary terminal-glow">{"<"}</span>
-              <span className="text-foreground">Lakshya</span>
-              <span className="text-primary terminal-glow">{" />"}</span>
+              LAKSHYA.
             </motion.div>
 
             {/* Navigation links */}
@@ -36,7 +34,7 @@ const Footer = () => {
                 <a
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors font-mono"
+                  className="text-sm text-white/50 hover:text-white transition-colors"
                 >
                   {item}
                 </a>
@@ -49,31 +47,31 @@ const Footer = () => {
               whileInView={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="flex items-center gap-4"
+              className="flex items-center gap-4 text-white/50"
             >
               <a
                 href={`https://github.com/${contactData.github}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="hover:text-white transition-colors"
               >
-                <Github size={18} />
+                <Github size={20} />
               </a>
               <a
                 href={`https://linkedin.com/in/${contactData.linkedin}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="hover:text-white transition-colors"
               >
-                <Linkedin size={18} />
+                <Linkedin size={20} />
               </a>
               <a
-                href={`https://twitter.com/${contactData.twitter}`}
+                href={`https://twitter.com/${contactData.linkedin}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                className="hover:text-white transition-colors"
               >
-                <Twitter size={18} />
+                <Twitter size={20} />
               </a>
             </motion.div>
           </div>
@@ -84,14 +82,11 @@ const Footer = () => {
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             viewport={{ once: true }}
-            className="text-center border-t border-border pt-8"
+            className="text-center border-t border-white/5 pt-8"
           >
-            <p className="text-sm text-muted-foreground font-mono flex items-center justify-center gap-1 flex-wrap">
+            <p className="text-sm text-white/40 flex items-center justify-center gap-2 flex-wrap">
               <span>© {currentYear} Lakshya Gupta.</span>
-              <span>Built with</span>
-              <Heart className="text-destructive" size={14} />
-              <span>using React + Tailwind</span>
-              <span className="cursor-blink text-primary">_</span>
+              <span className="flex items-center gap-1">Built with <Heart className="text-white/40" fill="currentColor" size={14} /> using React</span>
             </p>
           </motion.div>
         </div>

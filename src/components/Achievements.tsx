@@ -1,98 +1,129 @@
-import { motion } from "framer-motion";
-import { Award, Tag, CheckCircle2, ChevronRight, Star } from "lucide-react";
-import { achievementsData } from "@/data/portfolio";
+import { useLayoutEffect, useRef, useState, type CSSProperties } from "react";
+import "./achievements/achievements.css";
+import SprayHeading from "@/components/site/SprayHeading";
+import { playPaper } from "@/components/site/sfx";
+import { gsap, reducedMotion, ScrollTrigger } from "@/components/site/motion";
+import { CARD_ICONS, CARD_SHAPES } from "./achievements/cardArt";
+import { CARDS, type Card } from "./achievements/cards";
+
+/**
+ * Achievements as VinHack-style colour cards. Each card prints its receipt
+ * when the section comes on screen; pointing at a card (or tapping it on a
+ * phone) swaps in its second colour and shape and pulls the receipt out a
+ * little further.
+ */
+
+
+function Face({ c, hot }: { c: Card; hot: boolean }) {
+  const icon = CARD_ICONS[c.icon];
+  // White lettering on the second colour gets a thin black edge, like the VinHack cards.
+  const edge = hot && c.altText === "#FFFFFF";
+  return (
+    <div className={`ac-face ${hot ? "ac-face-hot" : "ac-face-rest"}`} aria-hidden={hot} style={{ color: hot ? c.altText : c.text }}>
+      <svg viewBox="0 0 64 64" width="70" height="70" aria-hidden>
+        <path d={icon.d} fill="currentColor" fillRule={icon.rule as "evenodd" | "nonzero"} stroke={edge ? "#000000" : "none"} strokeWidth="1.5" />
+      </svg>
+      <span className="ac-label" style={{ WebkitTextStroke: edge ? "1px #000000" : undefined }}>{c.face}</span>
+    </div>
+  );
+}
+
+function AchievementCard({ c, i }: { c: Card; i: number }) {
+  const [hot, setHot] = useState(false);
+  const shape = CARD_SHAPES[c.shape];
+  return (
+    <div
+      className={`ac-item ${hot ? "is-hot" : ""}`}
+      tabIndex={0}
+      aria-label={`${c.name}, ${c.when}. ${c.body}`}
+      onClick={(e) => {
+        // Touch screens have no hover, so a tap toggles the card instead.
+        if ((e.nativeEvent as PointerEvent).pointerType !== "mouse") {
+          setHot((h) => !h);
+          playPaper();
+        }
+      }}
+      style={{ "--ac-delay": `${300 + i * 140}ms`, "--ac-print": `${1100 + i * 180}ms` } as CSSProperties}
+    >
+      <div style={{ transform: `rotate(${c.tilt}deg)` }}>
+        <div className="ac-card" style={{ background: c.bg }}>
+          <span className="ac-alt" style={{ background: c.alt }} />
+          <svg className="ac-shape" viewBox={shape.vb} preserveAspectRatio="xMidYMid meet" aria-hidden>
+            <path d={shape.d} fill={c.bg} />
+          </svg>
+          <Face c={c} hot={false} />
+          <Face c={c} hot />
+        </div>
+        <div className="ac-receipt">
+          <div className="ac-print">
+            <div className="ac-slip">
+              <div className="flex items-baseline justify-between gap-2">
+                <span style={{ fontSize: 14.5, lineHeight: 1.1, letterSpacing: "-0.01em" }}>{c.name}</span>
+                <span className="flex-none" style={{ fontFamily: "'Space Mono', monospace", fontSize: 10.5, fontWeight: 700, lineHeight: 1.2, letterSpacing: "0.08em", color: c.ink }}>
+                  {c.when}
+                </span>
+              </div>
+              <p className="m-0 mt-[7px]" style={{ fontSize: 12, lineHeight: 1.35, color: "#FA1A1D" }}>{c.where}</p>
+              <p className="m-0 mt-[5px]" style={{ fontSize: 11.5, lineHeight: 1.6, color: "rgba(0,0,0,0.72)" }}>{c.body}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const Achievements = () => {
+  const ref = useRef<HTMLElement>(null);
+  // Dealt onto the table like VinHack's stickers: each card thrown in from the
+  // side it lands on, turned and a little small, a beat after the one before.
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    // The receipts print (in CSS) while this class is on; it comes off when the section is scrolled back off below.
+    const printer = ScrollTrigger.create({ trigger: root, start: "top 70%", onEnter: () => root.classList.add("is-on"), onLeaveBack: () => root.classList.remove("is-on") });
+    if (reducedMotion()) return () => printer.kill();
+    const ctx = gsap.context(() => {
+      const cards = gsap.utils.toArray<HTMLElement>(".ac-item", root);
+      const mid = root.getBoundingClientRect().left + root.getBoundingClientRect().width / 2;
+      cards.forEach((card, i) => {
+        const r = card.getBoundingClientRect();
+        const left = r.left + r.width / 2 < mid;
+        gsap.from(card, {
+          x: left ? -420 : 420,
+          y: i % 2 ? 160 : -120,
+          rotation: left ? -14 : 14,
+          scale: 0.8,
+          opacity: 0,
+          duration: 0.7,
+          delay: i * 0.09,
+          ease: "power3.out",
+          scrollTrigger: { trigger: root, start: "top 70%", toggleActions: "play none none reset" },
+        });
+      });
+    }, root);
+    return () => {
+      ctx.revert();
+      printer.kill();
+    };
+  }, []);
+
   return (
-    <section id="achievements" className="py-24 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute bottom-0 left-1/4 w-[450px] h-[450px] bg-primary/5 blur-[120px] rounded-full -z-10" />
-
-      <div className="container px-6">
-        <motion.div
-           initial={{ opacity: 0, y: 40 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-           viewport={{ once: true }}
-           className="max-w-4xl mx-auto"
-        >
-          {/* Section Header */}
-          <div className="flex flex-col items-center mb-10 text-center">
-            <motion.div 
-               initial={{ scale: 0.9, opacity: 0 }}
-               whileInView={{ scale: 1, opacity: 1 }}
-               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[9px] font-mono tracking-[0.15em] uppercase mb-3"
-            >
-               <motion.div
-                 animate={{ 
-                   scale: [1, 1.4, 1], 
-                   rotateY: [0, 180, 360],
-                   filter: ["drop-shadow(0 0 0px rgba(34,197,94,0))", "drop-shadow(0 0 10px rgba(34,197,94,0.5))", "drop-shadow(0 0 0px rgba(34,197,94,0))"] 
-                 }}
-                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-               >
-                 <Award size={12} />
-               </motion.div>
-               <span className="font-bold">HONORS_DISTINCTION_V2</span>
-            </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">Extra-curricular <span className="text-primary italic font-serif">& Achievements</span></h2>
-          </div>
-
-          {/* Unified Window Frame */}
-          <div className="relative rounded-[1.5rem] bg-white/[0.02] backdrop-blur-2xl border border-white/5 shadow-2xl overflow-hidden group">
-            {/* Window Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/[0.01]">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#FF5F56] shadow-[0_0_10px_rgba(255,95,86,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#FFBD2E] shadow-[0_0_10px_rgba(255,189,46,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#27C93F] shadow-[0_0_10px_rgba(39,201,63,0.2)]" />
-                </div>
-                <div className="ml-4 flex items-center gap-3 text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.2em]">
-                  <span className="w-1 h-1 rounded-full bg-primary/20" />
-                  <span>Rewards — achievements.log</span>
-                </div>
-              </div>
-              <Star size={14} className="text-primary/30" />
-            </div>
-
-            <div className="p-6 md:p-8 bg-transparent">
-              <div className="space-y-4">
-                {achievementsData.map((item, index) => (
-                  <motion.div
-                    key={item.version}
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    viewport={{ once: true }}
-                    className="group/item relative flex items-center p-4 md:p-6 rounded-2xl bg-white/[0.01] border border-white/5 hover:border-primary/20 hover:bg-white/[0.04] transition-all shadow-sm"
-                  >
-                     <div className="flex-shrink-0 mr-6 hidden sm:block">
-                        <div className="w-12 h-12 rounded-xl bg-primary/5 border border-primary/10 flex items-center justify-center text-primary/40 group-hover/item:text-primary transition-all group-hover/item:rotate-12">
-                           <CheckCircle2 size={24} strokeWidth={1.5} />
-                        </div>
-                     </div>
-
-                     <div className="flex-1 space-y-2">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                           <div className="flex items-center gap-3">
-                              <Tag size={12} className="text-primary/30" />
-                              <span className="px-2 py-0.5 rounded bg-primary/10 text-[9px] font-mono font-bold text-primary tracking-widest uppercase">{item.version}</span>
-                              <h3 className="text-base font-bold text-white/90 group-hover/item:text-primary transition-colors">{item.title}</h3>
-                           </div>
-                           <span className="text-[10px] font-mono text-muted-foreground/30 uppercase tracking-widest">{item.date}</span>
-                        </div>
-                        <p className="text-[12px] font-mono text-muted-foreground/60 leading-relaxed pl-7 border-l border-white/5 italic">
-                           {item.description}
-                        </p>
-                     </div>
-
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </motion.div>
+    <section id="achievements" ref={ref} aria-label="Achievements" className="ac-root pb-28 pt-12">
+      <div className="mx-auto mb-10 max-w-[1440px] px-5 md:mb-14 md:px-[70px]">
+        <SprayHeading
+          text="ACHIEVEMENTS"
+          size="clamp(34px, 6.7vw, 96px)"
+          drips={[
+            { x: 1.625, y: 0.9375, h: 0.375, w: 0.052 },
+            { x: 5.771, y: 0.79, h: 0.25, w: 0.042 },
+          ]}
+        />
+      </div>
+      <div className="ac-grid">
+        {CARDS.map((c, i) => (
+          <AchievementCard key={c.face} c={c} i={i} />
+        ))}
       </div>
     </section>
   );

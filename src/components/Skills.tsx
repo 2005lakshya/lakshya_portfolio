@@ -1,187 +1,170 @@
-import { motion } from "framer-motion";
-import { Code2, Hash, Terminal } from "lucide-react";
-import { skillsData } from "@/data/portfolio";
+import { useEffect, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from "react";
+import "./skills/skills.css";
+import SprayHeading from "@/components/site/SprayHeading";
+import ScaledStage from "@/components/site/ScaledStage";
+import { stagePoint, useMediaQuery } from "@/components/site/hooks";
+import { playClick } from "@/components/site/sfx";
 
-// Tech badge colors - light pastel colors with icons
-const techColors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
-  "C": { bg: "bg-blue-100/5", border: "border-blue-300/20", text: "text-blue-200/60", icon: "©️" },
-  "C++": { bg: "bg-indigo-100/5", border: "border-indigo-300/20", text: "text-indigo-200/60", icon: "➕" },
-  "C#": { bg: "bg-purple-100/5", border: "border-purple-300/20", text: "text-purple-200/60", icon: "#️⃣" },
-  "CSS3": { bg: "bg-cyan-100/5", border: "border-cyan-300/20", text: "text-cyan-200/60", icon: "🎨" },
-  "HTML5": { bg: "bg-orange-100/5", border: "border-orange-300/20", text: "text-orange-200/60", icon: "🌐" },
-  "JAVA": { bg: "bg-red-100/5", border: "border-red-300/20", text: "text-red-200/60", icon: "☕" },
-  "JavaScript": { bg: "bg-yellow-100/5", border: "border-yellow-400/20", text: "text-yellow-200/60", icon: "🟨" },
-  "Bootstrap": { bg: "bg-violet-100/5", border: "border-violet-300/20", text: "text-violet-200/60", icon: "🅱️" },
-  "Node.js": { bg: "bg-green-100/5", border: "border-green-300/20", text: "text-green-200/60", icon: "🟢" },
-  "MySQL": { bg: "bg-sky-100/5", border: "border-sky-300/20", text: "text-sky-200/60", icon: "🐬" },
-  "Canvas": { bg: "bg-teal-100/5", border: "border-teal-300/20", text: "text-teal-200/60", icon: "🖼️" },
-  "Figma": { bg: "bg-pink-100/5", border: "border-pink-300/20", text: "text-pink-200/60", icon: "🎨" },
-  "Framer": { bg: "bg-slate-100/5", border: "border-slate-300/20", text: "text-slate-200/60", icon: "🔳" },
-  "Git": { bg: "bg-orange-100/5", border: "border-orange-300/20", text: "text-orange-200/60", icon: "🔀" },
-  "Flutter": { bg: "bg-cyan-100/5", border: "border-cyan-300/20", text: "text-cyan-200/60", icon: "🐦" },
-  "React": { bg: "bg-sky-100/5", border: "border-sky-300/20", text: "text-sky-200/60", icon: "⚛️" },
-  "Python": { bg: "bg-blue-100/5", border: "border-blue-300/20", text: "text-blue-200/60", icon: "🐍" },
-  "Java": { bg: "bg-red-100/5", border: "border-red-300/20", text: "text-red-200/60", icon: "☕" },
-  "TypeScript": { bg: "bg-blue-100/5", border: "border-blue-300/20", text: "text-blue-200/60", icon: "🔷" },
-  "Kotlin": { bg: "bg-purple-100/5", border: "border-purple-300/20", text: "text-purple-200/60", icon: "🇰" },
-  "HTML": { bg: "bg-orange-100/5", border: "border-orange-300/20", text: "text-orange-200/60", icon: "📄" },
-  "CSS": { bg: "bg-blue-100/5", border: "border-blue-300/20", text: "text-blue-200/60", icon: "🎨" },
-  "PostgreSQL": { bg: "bg-indigo-100/5", border: "border-indigo-300/20", text: "text-indigo-200/60", icon: "🐘" },
-  "MongoDB": { bg: "bg-green-100/5", border: "border-green-300/20", text: "text-green-200/60", icon: "🍃" },
-  "SQLite": { bg: "bg-cyan-100/5", border: "border-cyan-300/20", text: "text-cyan-200/60", icon: "🪶" },
-  "Firebase": { bg: "bg-amber-100/5", border: "border-amber-300/20", text: "text-amber-200/60", icon: "🔥" },
-  "DynamoDB": { bg: "bg-orange-100/5", border: "border-orange-300/20", text: "text-orange-200/60", icon: "⚡" },
-  "MATLAB": { bg: "bg-red-100/5", border: "border-red-300/20", text: "text-red-200/60", icon: "📊" },
-  "Verilog": { bg: "bg-violet-100/5", border: "border-violet-300/20", text: "text-violet-200/60", icon: "🔌" },
-  "TinkerCAD": { bg: "bg-teal-100/5", border: "border-teal-300/20", text: "text-teal-200/60", icon: "🔧" },
-  "AWS": { bg: "bg-amber-100/5", border: "border-amber-300/20", text: "text-amber-200/60", icon: "☁️" },
-  "GitHub": { bg: "bg-gray-100/5", border: "border-gray-300/20", text: "text-gray-200/60", icon: "🐱" },
-  "Next.js": { bg: "bg-slate-100/5", border: "border-slate-300/20", text: "text-slate-200/60", icon: "▲" },
-  "Express.js": { bg: "bg-gray-100/5", border: "border-gray-300/20", text: "text-gray-200/60", icon: "🚂" },
-  "TailwindCSS": { bg: "bg-cyan-100/5", border: "border-cyan-300/20", text: "text-cyan-200/60", icon: "💨" },
-  "FastAPI": { bg: "bg-teal-100/5", border: "border-teal-300/20", text: "text-teal-200/60", icon: "⚡" },
-  "Streamlit": { bg: "bg-red-100/5", border: "border-red-300/20", text: "text-red-200/60", icon: "🎈" },
-  "Pandas": { bg: "bg-indigo-100/5", border: "border-indigo-300/20", text: "text-indigo-200/60", icon: "🐼" },
-  "NumPy": { bg: "bg-blue-100/5", border: "border-blue-400/20", text: "text-blue-900/60", icon: "🔢" },
-  "Postman": { bg: "bg-orange-100/5", border: "border-orange-300/20", text: "text-orange-200/60", icon: "🚀" },
-  "SQL": { bg: "bg-sky-100/5", border: "border-sky-300/20", text: "text-sky-200/60", icon: "🗄️" },
+/**
+ * Skills as tags sprayed on a black wall in UV paint: invisible until the
+ * torch passes over them. The torch follows the mouse, and wanders by itself
+ * when nobody is holding it. A red count marks how many projects used a skill.
+ */
+
+const W = 1440;
+const H = 900;
+
+/** Under UV every tag lights up in the colour of the project that uses it most. */
+const NEON: Record<string, string> = { RoboWars: "#F3A8FF", HackXpertise: "#FF4D50", Verimind: "#8FA2FF", "Plant Care": "#7FE3FF", MessIT: "#FFFFFF", BunkBuddies: "#FFFFFF" };
+const USED: Record<string, string[]> = {
+  REACT: ["RoboWars", "HackXpertise", "BunkBuddies"],
+  TYPESCRIPT: ["RoboWars", "BunkBuddies"],
+  PYTHON: ["Verimind", "Plant Care"],
+  TAILWIND: ["RoboWars", "BunkBuddies"],
+  FIREBASE: ["MessIT", "BunkBuddies"],
+  FLUTTER: ["MessIT"],
+  "NODE.JS": ["HackXpertise"],
+  MONGODB: ["HackXpertise"],
+  TENSORFLOW: ["Plant Care"],
+  FLASK: ["Plant Care"],
+  "GEMINI AI": ["Plant Care"],
+  ML: ["Verimind"],
 };
+/** [name, x, y, size, rotation] on the 1440 x 900 wall. */
+const LAYOUT: [string, number, number, number, number][] = [
+  ["REACT", 70, 180, 120, -6], ["JAVA", 508, 214, 52, 4], ["TYPESCRIPT", 679, 190, 80, -3], ["C++", 1253, 206, 52, 8],
+  ["NEXT.JS", 70, 342, 46, 5], ["PYTHON", 319, 314, 104, 3], ["TAILWIND", 773, 322, 74, -5], ["FIGMA", 1205, 334, 48, -6],
+  ["FIREBASE", 70, 452, 80, -2], ["FLUTTER", 535, 458, 64, 6], ["KOTLIN", 870, 472, 46, -4], ["NODE.JS", 1088, 454, 60, 3],
+  ["MONGODB", 70, 580, 68, 4], ["EXPRESS", 424, 596, 44, -5], ["TENSORFLOW", 663, 578, 72, -3], ["GIT", 1183, 586, 56, 10],
+  ["FASTAPI", 70, 708, 44, -4], ["FLASK", 309, 694, 74, 5], ["GEMINI AI", 591, 700, 66, -4], ["JAVASCRIPT", 1025, 714, 42, -6],
+  ["POSTGRES", 90, 816, 44, 3], ["ML", 370, 798, 64, -8], ["MYSQL", 500, 820, 44, 6], ["C#", 690, 812, 48, -4],
+];
 
-const Skills = () => {
-  // Helper function to get badge colors
-  const getBadgeColor = (name: string) => {
-    return techColors[name] || { bg: "bg-gray-100/5", border: "border-gray-300/20", text: "text-gray-200/60", icon: "💻" };
-  };
+const TAGS = LAYOUT.map(([name, x, y, size, r]) => {
+  const list = USED[name] ?? [];
+  return { name, x, y, size, r, count: list.length, neon: list.length ? NEON[list[0]] : "#FFD23F" };
+});
 
-  // Custom rows based on user's request
-  const dbRow = ["PostgreSQL", "MySQL", "SQLite", "MongoDB", "Firebase", "SQL"];
-  const dbRowLooped = [...dbRow, ...dbRow, ...dbRow, ...dbRow];
-  const langRow = ["Python", "C", "C++", "C#", "Java", "Kotlin", "Flutter", "TypeScript", "JavaScript"];
-  const langRowLooped = [...langRow, ...langRow, ...langRow];
-  const toolsRow = ["Postman", "MATLAB", "Verilog", "TinkerCAD", "Figma", "Git", "GitHub", "AWS"];
-  const toolsRowLooped = [...toolsRow, ...toolsRow, ...toolsRow];
-  const frameworksRow = ["FastAPI", "Streamlit", "Pandas", "NumPy", "React", "Next.js", "Node.js", "Express.js", "TailwindCSS"];
-  const fwRowLooped = [...frameworksRow, ...frameworksRow, ...frameworksRow];
+type Tag = (typeof TAGS)[number];
 
-  // Premium badge component
-  const SkillBadge = ({ name, idx, category }: { name: string; idx: number; category: string }) => {
-    const colors = getBadgeColor(name);
-    return (
-      <motion.span
-        key={`${name}-${category}-${idx}`}
-        className={`px-3 py-1.5 rounded-xl font-mono font-black text-[9px] flex-shrink-0 whitespace-nowrap ${colors.bg} ${colors.border} ${colors.text} border shadow-sm flex items-center gap-2 hover:border-primary/40 hover:text-primary transition-all duration-300 cursor-default group uppercase tracking-widest`}
-      >
-        <span className="text-xs group-hover:scale-110 transition-transform duration-300 opacity-60 group-hover:opacity-100">{colors.icon}</span>
-        <span>{name}</span>
-      </motion.span>
-    );
+function TagText({ t, lit, flow }: { t: Tag; lit: boolean; flow?: boolean }) {
+  const size = flow ? Math.max(22, Math.round(t.size * 0.42)) : t.size;
+  const style: CSSProperties = flow
+    ? { fontSize: size, transform: `rotate(${t.r}deg)` }
+    : { left: t.x, top: t.y, fontSize: size, transform: `rotate(${t.r}deg)` };
+  if (!lit) return <span className="sk-tag" style={{ ...style, color: "rgba(255,255,255,0.08)" }}>{t.name}</span>;
+  return (
+    <span className="sk-tag" style={{ ...style, color: t.neon, textShadow: `0 0 6px ${t.neon}, 0 0 22px ${t.neon}` }}>
+      {t.name}
+      {t.count > 0 && <span className="sk-n">x{t.count}</span>}
+    </span>
+  );
+}
+
+function Torch({ scale = 1 }: { scale?: number }) {
+  return (
+    <>
+      <div className="absolute rounded-full" style={{ left: -300 * scale, top: -300 * scale, width: 600 * scale, height: 600 * scale, background: "radial-gradient(closest-side, rgba(150,80,255,0.26), rgba(110,50,220,0.1) 60%, transparent)", mixBlendMode: "screen" }} />
+      <svg width={130 * scale} height={60 * scale} viewBox="0 0 130 60" aria-hidden className="absolute" style={{ left: 170 * scale, top: 150 * scale, transform: "rotate(42deg)", transformOrigin: `0 ${30 * scale}px` }}>
+        <rect x="0" y="16" width="30" height="28" rx="4" fill="#2B2B2B" stroke="#555555" strokeWidth="2" />
+        <rect x="30" y="20" width="96" height="20" rx="6" fill="#1E1E1E" stroke="#555555" strokeWidth="2" />
+        <rect x="4" y="20" width="4" height="20" fill="#B983FF" />
+        <rect x="64" y="25" width="14" height="10" rx="2" fill="#7A3CFF" />
+      </svg>
+    </>
+  );
+}
+
+/** Desktop: the wall exactly as drawn, scaled to fit. */
+function Wall() {
+  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  const [wide, setWide] = useState(false);
+  const on = at !== null;
+  const r = wide ? 320 : 210;
+
+  const move = (e: MouseEvent<HTMLDivElement>) => {
+    const p = stagePoint(e.currentTarget, e.clientX, e.clientY, W, H);
+    setAt({ x: Math.round(p.x), y: Math.round(p.y) });
   };
 
   return (
-    <section id="skills" className="py-24 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-1/4 left-1/2 w-[600px] h-[600px] bg-primary/5 blur-[160px] rounded-full -z-10 -translate-x-1/2" />
-
-      <div className="container px-6">
-        <motion.div
-           initial={{ opacity: 0, y: 40 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-           viewport={{ once: true }}
-           className="max-w-5xl mx-auto"
+    <ScaledStage w={W} h={H} grow={1.35}>
+      <div className="relative h-full w-full" style={{ cursor: "none" }} onMouseMove={move} onMouseLeave={() => { setAt(null); setWide(false); }} onMouseDown={() => { setWide(true); playClick(); }} onMouseUp={() => setWide(false)}>
+        <div aria-hidden className="absolute inset-0">
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit={false} />)}
+        </div>
+        <div
+          aria-hidden
+          className="sk-lit absolute inset-0 pointer-events-none"
+          style={{
+            // Holding the button down opens the beam up.
+            clipPath: on ? `circle(${r}px at ${at.x}px ${at.y}px)` : undefined,
+            transition: "clip-path 220ms cubic-bezier(0.34,1.56,0.64,1)",
+            animation: on ? "none" : "sk-wander 18s ease-in-out 1.4s infinite",
+          }}
         >
-          {/* Section Header */}
-          <div className="flex flex-col items-center mb-10 text-center">
-            <motion.div 
-               initial={{ scale: 0.9, opacity: 0 }}
-               whileInView={{ scale: 1, opacity: 1 }}
-               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[9px] font-mono tracking-[0.15em] uppercase mb-3"
-            >
-               <motion.div
-                 animate={{ 
-                   scale: [1, 1.3, 1], 
-                   opacity: [0.5, 1, 0.5],
-                   rotate: [0, 15, -15, 0] 
-                 }}
-                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-               >
-                 <Code2 size={12} />
-               </motion.div>
-               <span className="font-bold">STACK_MANIFEST_V2</span>
-            </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">Languages <span className="text-primary italic font-serif">& Skills</span></h2>
-          </div>
-
-          {/* Unified Window Frame */}
-          <div className="relative rounded-[1.5rem] bg-white/[0.02] backdrop-blur-2xl border border-white/5 shadow-2xl overflow-hidden group">
-            {/* Window Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/[0.01]">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#FF5F56] shadow-[0_0_10px_rgba(255,95,86,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#FFBD2E] shadow-[0_0_10px_rgba(255,189,46,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#27C93F] shadow-[0_0_10px_rgba(39,201,63,0.2)]" />
-                </div>
-                <div className="ml-4 flex items-center gap-3 text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.2em]">
-                  <span className="w-1 h-1 rounded-full bg-primary/20" />
-                  <span>Terminal Hub — tech --list</span>
-                </div>
-              </div>
-              <Hash size={14} className="text-primary/30" />
-            </div>
-
-            <div className="p-6 md:p-10 space-y-8 bg-transparent">
-               {/* Databases */}
-               <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-primary/30 uppercase tracking-widest pl-2">
-                     <span className="text-primary">$</span> <span className="text-muted-foreground/50">databases_registry</span>
-                  </div>
-                  <div className="overflow-hidden border-y border-white/5 py-4">
-                    <motion.div className="flex w-max gap-4" animate={{ x: ["0%", "-50%"] }} transition={{ duration: 30, repeat: Infinity, ease: "linear" }}>
-                      {[...dbRowLooped, ...dbRowLooped].map((name, idx) => (<SkillBadge key={idx} name={name} idx={idx} category="db" />))}
-                    </motion.div>
-                  </div>
-               </div>
-
-               {/* Languages */}
-               <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-primary/30 uppercase tracking-widest pl-2">
-                     <span className="text-primary">$</span> <span className="text-muted-foreground/50">language_engines</span>
-                  </div>
-                  <div className="overflow-hidden border-y border-white/5 py-4">
-                    <motion.div className="flex w-max gap-4" animate={{ x: ["-50%", "0%"] }} transition={{ duration: 35, repeat: Infinity, ease: "linear" }}>
-                      {[...langRowLooped, ...langRowLooped].map((name, idx) => (<SkillBadge key={idx} name={name} idx={idx} category="lang" />))}
-                    </motion.div>
-                  </div>
-               </div>
-
-               {/* Frameworks */}
-               <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-primary/30 uppercase tracking-widest pl-2">
-                     <span className="text-primary">$</span> <span className="text-muted-foreground/50">system_frameworks</span>
-                  </div>
-                  <div className="overflow-hidden border-y border-white/5 py-4">
-                    <motion.div className="flex w-max gap-4" animate={{ x: ["0%", "-50%"] }} transition={{ duration: 40, repeat: Infinity, ease: "linear" }}>
-                      {[...fwRowLooped, ...fwRowLooped].map((name, idx) => (<SkillBadge key={idx} name={name} idx={idx} category="fw" />))}
-                    </motion.div>
-                  </div>
-               </div>
-
-               {/* Tools */}
-               <div className="space-y-4">
-                  <div className="flex items-center gap-3 text-[10px] font-mono text-primary/30 uppercase tracking-widest pl-2">
-                     <span className="text-primary">$</span> <span className="text-muted-foreground/50">developer_tools</span>
-                  </div>
-                  <div className="overflow-hidden border-y border-white/5 py-4">
-                    <motion.div className="flex w-max gap-4" animate={{ x: ["-50%", "0%"] }} transition={{ duration: 45, repeat: Infinity, ease: "linear" }}>
-                      {[...toolsRowLooped, ...toolsRowLooped].map((name, idx) => (<SkillBadge key={idx} name={name} idx={idx} category="tools" />))}
-                    </motion.div>
-                  </div>
-               </div>
-            </div>
-          </div>
-        </motion.div>
+          <div className="absolute inset-0" style={{ background: "rgba(60,20,120,0.35)" }} />
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit />)}
+          <span className="sk-tag" style={{ left: 1150, top: 830, fontSize: 30, transform: "rotate(-4deg)", color: "#B6FF3B", textShadow: "0 0 8px #B6FF3B" }}>LG WAS HERE</span>
+        </div>
+        <div className="sk-torch left-0 top-0" style={{ transform: on ? `translate(${at.x}px, ${at.y}px)` : undefined, animation: on ? "none" : "sk-wander-at 18s ease-in-out 1.4s infinite" }}>
+          <Torch />
+        </div>
+        <div className="absolute" style={{ left: 70, top: 24, zIndex: 5 }}>
+          <SprayHeading text="SKILLS" size="120px" />
+        </div>
       </div>
+    </ScaledStage>
+  );
+}
+
+/** Phones: the tags in a loose pile; the torch wanders, and a tap points it. */
+function Pile() {
+  const box = useRef<HTMLDivElement>(null);
+  const timer = useRef<number>();
+  const [at, setAt] = useState<{ x: number; y: number } | null>(null);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+
+  const point = (e: PointerEvent<HTMLDivElement>) => {
+    const r = box.current?.getBoundingClientRect();
+    if (!r) return;
+    setAt({ x: Math.round(e.clientX - r.left), y: Math.round(e.clientY - r.top) });
+    playClick();
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setAt(null), 3500);
+  };
+
+  const on = at !== null;
+  return (
+    <div className="px-4 pb-16 pt-10">
+      <SprayHeading text="SKILLS" size="clamp(56px, 16vw, 96px)" />
+      <div ref={box} className="relative mt-6" onPointerDown={point}>
+        <div aria-hidden className="sk-flow text-center">
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit={false} flow />)}
+        </div>
+        <div
+          aria-hidden
+          className="sk-lit sk-flow absolute inset-0 text-center pointer-events-none"
+          style={{ clipPath: on ? `circle(120px at ${at.x}px ${at.y}px)` : undefined, animation: on ? "none" : "sk-wander-pct 14s ease-in-out infinite", background: "rgba(60,20,120,0.35)" }}
+        >
+          {TAGS.map((t) => <TagText key={t.name} t={t} lit flow />)}
+        </div>
+        <div className="sk-torch" style={on ? { left: at.x, top: at.y } : { animation: "sk-wander-pct-at 14s ease-in-out infinite" }}>
+          <Torch scale={0.55} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const Skills = () => {
+  const desktop = useMediaQuery("(min-width: 900px)");
+  return (
+    <section id="skills" aria-label="Skills" className="sk-root">
+      <p className="sr-only">
+        Skills: {TAGS.map((t) => t.name).join(", ")}.
+      </p>
+      {desktop ? <Wall /> : <Pile />}
     </section>
   );
 };

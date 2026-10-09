@@ -1,176 +1,178 @@
-import { motion } from "framer-motion";
-import { User, FileCode, Coffee, Globe, GraduationCap, MapPin, Activity, ShieldCheck, Terminal as TerminalIcon } from "lucide-react";
-import { profileData } from "@/data/portfolio";
+import { useLayoutEffect, useRef, type ReactNode } from "react";
+import "./about/about.css";
+import SprayHeading from "@/components/site/SprayHeading";
+import { gsap, reducedMotion, ScrollTrigger, stampIn } from "@/components/site/motion";
+import { playSlap } from "@/components/site/sfx";
+
+/**
+ * About me as a page of a spiral notebook.
+ *
+ * The page is laid down over the bottom of the hero as it scrolls in: it comes
+ * up slightly turned and straightens out, like a sheet dropped on a desk. Once
+ * it is on screen it writes itself, line by line, with a pen that leans like a
+ * nib, and the doodles are drawn in between the lines. The polaroid comes down
+ * like a stamp and gets taped.
+ */
+
+type Line = { body: ReactNode; className?: string };
+
+const Star = () => (
+  <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden style={{ verticalAlign: -6, display: "inline" }}>
+    <path data-doodle="star" className="ab-draw" d="M17 3 L21 13 L32 13 L23 20 L26 31 L17 24 L8 31 L11 20 L2 13 L13 13 Z" pathLength={1} fill="none" stroke="#FA1A1D" strokeWidth="2.5" strokeLinejoin="round" />
+  </svg>
+);
+
+const Cup = () => (
+  <svg width="40" height="36" viewBox="0 0 40 36" aria-hidden style={{ verticalAlign: -6, display: "inline" }}>
+    <path data-doodle="cup" className="ab-draw" d="M6 12 H28 V24 A8 8 0 0 1 20 32 H14 A8 8 0 0 1 6 24 Z M28 15 H32 A4 4 0 0 1 32 23 H28 M12 8 C10 5 14 4 12 1 M19 8 C17 5 21 4 19 1" pathLength={1} fill="none" stroke="#1B2F8F" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const LINES: Line[] = [
+  { body: <>Dear diary, <Star /></> },
+  {
+    body: (
+      <>
+        I'm Lakshya, a{" "}
+        <span style={{ textDecoration: "underline wavy #FA1A1D", textDecorationThickness: 2, textUnderlineOffset: 7 }}>developer and data scientist</span>.
+      </>
+    ),
+  },
+  { body: "B.Tech CSE (Data Science) at VIT Vellore." },
+  { body: "I build apps, websites and AI experiments." },
+  {
+    body: (
+      <>
+        Status: <span className="ab-struck" data-strike>unemployed (but I make it sound cool)</span>.
+      </>
+    ),
+  },
+  { body: "→ update: summer intern @ NTT DATA", className: "text-[#FA1A1D] font-bold" },
+  { body: <>Superpower: turning coffee into code <Cup /></> },
+  { body: "and bugs into features." },
+  { body: "Home base: Gurgaon, India." },
+];
+
+/** Which doodle gets drawn once which line is written. */
+const AFTER_LINE: Record<number, string[]> = { 0: ["star"], 1: ["arrow"], 6: ["cup"], 8: ["rocket"] };
+
+const Ring = () => (
+  <svg viewBox="0 0 90 50" aria-hidden>
+    <circle cx="70" cy="25" r="8" fill="#000000" />
+    <path d="M70 20 C 52 4, 20 5, 12 26" fill="none" stroke="#8C8C8C" strokeWidth="6" strokeLinecap="round" />
+    <path d="M68 18 C 52 6, 24 7, 15 22" fill="none" stroke="#E4E4E4" strokeWidth="1.8" strokeLinecap="round" />
+  </svg>
+);
 
 const About = () => {
+  const ref = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    const root = ref.current;
+    if (!root) return;
+    const ctx = gsap.context(() => {
+      if (reducedMotion()) return;
+      const q = (sel: string) => Array.from(root.querySelectorAll<SVGPathElement>(sel));
+
+      // Laid down over the hero: up from a slight turn while its top edge crosses the screen.
+      gsap.fromTo(root, { rotation: -1.6, y: 60 }, { rotation: 0, y: 0, ease: "none", scrollTrigger: { trigger: root, start: "top bottom", end: "top 25%", scrub: true } });
+
+      // The writing, as one paused timeline started when the page is well on screen.
+      const drawn = q("[data-doodle]");
+      gsap.set(drawn, { strokeDashoffset: 1 });
+      const strike = root.querySelector<HTMLElement>("[data-strike]");
+      if (strike) gsap.set(strike, { textDecorationColor: "rgba(250,26,29,0)" });
+      const lines = Array.from(root.querySelectorAll<HTMLElement>(".ab-line"));
+      const lean = Math.tan((15 * Math.PI) / 180);
+      const tl = gsap.timeline({ paused: true });
+      const cuts: ((p: number) => void)[] = [];
+      tl.to(q("[data-doodle=underline]"), { strokeDashoffset: 0, duration: 0.45, ease: "power2.out" });
+      lines.forEach((el, i) => {
+        const r = el.getBoundingClientRect();
+        const lead = r.width ? (r.height / r.width) * lean * 100 : 0;
+        const cut = (p: number) => {
+          const foot = -lead + p * (100 + lead);
+          el.style.clipPath = `polygon(-5% -50%, ${(foot + lead).toFixed(2)}% -50%, ${foot.toFixed(2)}% 150%, -5% 150%)`;
+        };
+        cut(0);
+        cuts.push(cut);
+        const pen = { p: 0 };
+        const dur = Math.max(0.35, (el.textContent?.length ?? 20) * 0.02);
+        tl.to(pen, { p: 1, duration: dur, ease: "none", onUpdate: () => cut(pen.p), onComplete: () => { el.style.clipPath = ""; } }, i === 0 ? ">-0.1" : `>-${(dur * 0.3).toFixed(2)}`);
+        if (i === 4 && strike) tl.to(strike, { textDecorationColor: "rgba(250,26,29,1)", duration: 0.3 }, ">");
+        (AFTER_LINE[i] ?? []).forEach((name) => tl.to(q(`[data-doodle=${name}]`), { strokeDashoffset: 0, duration: name === "rocket" ? 1 : 0.45, ease: "power1.inOut" }, "<0.1"));
+      });
+      ScrollTrigger.create({ trigger: root, start: "top 55%", onEnter: () => tl.restart(), onLeaveBack: () => {
+          // Rewound for next time: every line blank again, every doodle undrawn.
+          tl.pause(0);
+          cuts.forEach((c) => c(0));
+          gsap.set(drawn, { strokeDashoffset: 1 });
+          if (strike) gsap.set(strike, { textDecorationColor: "rgba(250,26,29,0)" });
+        } });
+
+      // The polaroid, stamped down, then taped.
+      const photo = root.querySelector(".ab-polaroid");
+      if (photo) {
+        stampIn(photo, { trigger: root, start: "top 45%", delay: 0.2, rest: 3, onHit: playSlap });
+        gsap.from(root.querySelectorAll(".ab-tape"), { opacity: 0, scale: 1.6, duration: 0.25, stagger: 0.12, delay: 0.85, ease: "power2.out", scrollTrigger: { trigger: root, start: "top 45%", toggleActions: "play none none reset" } });
+      }
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="about" className="py-24 relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-1/3 left-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full -z-10" />
+    <section id="about" ref={ref} aria-label="About me" className="ab-root">
+      <div className="ab-rings" aria-hidden>
+        {Array.from({ length: 40 }, (_, i) => (
+          <Ring key={i} />
+        ))}
+      </div>
+      <div className="ab-margin" aria-hidden />
 
-      <div className="container px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true }}
-          className="max-w-4xl mx-auto"
-        >
-          {/* Section Header */}
-          <div className="flex flex-col items-center mb-10 text-center">
-            <motion.div 
-               initial={{ scale: 0.9, opacity: 0 }}
-               whileInView={{ scale: 1, opacity: 1 }}
-               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-[9px] font-mono tracking-[0.15em] uppercase mb-3"
-            >
-               <motion.div
-                 animate={{ 
-                   rotateY: [0, 180, 360], 
-                   scale: [1, 1.25, 1],
-                   filter: ["drop-shadow(0 0 0px rgba(34,197,94,0))", "drop-shadow(0 0 8px rgba(34,197,94,0.4))", "drop-shadow(0 0 0px rgba(34,197,94,0))"] 
-                 }}
-                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-               >
-                 <FileCode size={12} />
-               </motion.div>
-               <span className="font-bold">SYSTEM_MANIFEST_V1</span>
-            </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-              <span className="text-white">README</span>
-              <span className="text-primary italic font-serif">.md</span>
-            </h2>
-          </div>
+      <div className="ab-inner">
+        <SprayHeading text="ABOUT ME" ink="marker" tilt={-2} size="clamp(42px, 8.2vw, 118px)" />
+        <svg className="ab-underline" viewBox="0 0 640 40" preserveAspectRatio="none" aria-hidden>
+          <path data-doodle="underline" className="ab-draw" d="M4 22 C 120 10, 260 30, 380 18 S 560 8, 634 20" pathLength={1} fill="none" stroke="#FA1A1D" strokeWidth="7" strokeLinecap="round" />
+        </svg>
 
-          {/* Unified Window Frame */}
-          <div className="relative rounded-[1.5rem] bg-white/[0.02] backdrop-blur-2xl border border-white/5 shadow-2xl overflow-hidden group">
-            {/* Window Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/[0.01]">
-              <div className="flex items-center gap-3">
-                <div className="flex gap-1.5">
-                  <div className="w-2 h-2 rounded-full bg-[#FF5F56] shadow-[0_0_10px_rgba(255,95,86,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#FFBD2E] shadow-[0_0_10px_rgba(255,189,46,0.2)]" />
-                  <div className="w-2 h-2 rounded-full bg-[#27C93F] shadow-[0_0_10px_rgba(39,201,63,0.2)] animate-pulse" />
-                </div>
-                <div className="ml-4 flex items-center gap-3 text-[8px] font-mono text-muted-foreground/40 uppercase tracking-[0.2em]">
-                  <span className="w-1 h-1 rounded-full bg-primary/20" />
-                  <span>lakshya@dev — profile.json</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 text-[8px] font-mono text-primary/40 uppercase tracking-widest hidden sm:flex">
-                 <span>UTF-8</span>
-                 <span className="w-1 h-1 rounded-full bg-white/10" />
-                 <span>Line 42, Col 8</span>
-              </div>
+        <div className="ab-lines">
+          {LINES.map((l, i) => (
+            <span key={i} className={`ab-line ${l.className ?? ""}`}>
+              {l.body}
+            </span>
+          ))}
+        </div>
+
+        <svg className="ab-arrow" width="160" height="90" viewBox="0 0 160 90" aria-hidden>
+          <path data-doodle="arrow" className="ab-draw" d="M6 70 C 50 80, 110 60, 146 22" pathLength={1} fill="none" stroke="#FA1A1D" strokeWidth="3" strokeLinecap="round" />
+          <path data-doodle="arrow" className="ab-draw" d="M128 22 L148 18 L146 40" pathLength={1} fill="none" stroke="#FA1A1D" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+
+        <div className="ab-polaroid">
+          <div className="ab-photo absolute inset-0">
+            <div className="absolute inset-0 bg-white" style={{ boxShadow: "0 14px 30px rgba(0,0,0,0.18), 0 2px 4px rgba(0,0,0,0.12)" }} />
+            <div className="absolute overflow-hidden" style={{ left: "5.5%", top: "4.1%", width: "89%", height: "79.5%", background: "#CFE9F4" }}>
+              <img src="/Lakshya.png" alt="Lakshya Gupta" className="absolute" style={{ left: "6.8%", top: "6.9%", width: "86.4%", height: "96.6%", objectFit: "cover" }} />
             </div>
-
-            <div className="grid lg:grid-cols-[1.2fr_1.8fr] divide-y lg:divide-y-0 lg:divide-x divide-white/5">
-              {/* Left Pane: Technical Node */}
-              <div className="p-5 sm:p-6 lg:p-8 bg-black/20 flex flex-col justify-between">
-                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-[10px] font-mono text-primary/60 uppercase tracking-widest bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10">
-                           <Coffee size={12} />
-                           <span className="font-bold">Core Instance</span>
-                        </div>
-                        <ShieldCheck size={14} className="text-primary/20" />
-                    </div>
-                    
-                    <div className="bg-black/40 rounded-xl p-5 border border-white/5 font-mono text-[11px] leading-relaxed relative overflow-hidden group/code">
-                       <div className="absolute top-0 right-0 p-2 opacity-5 group-hover/code:opacity-20 transition-opacity">
-                          <TerminalIcon size={40} />
-                       </div>
-                       <pre className="text-primary/70 overflow-x-auto custom-scrollbar">
-{`const admin = {
-  identity: "${profileData.name}",
-  role: "SWE / Data Science",
-  specs: [
-    "AI Engine Dev",
-    "ML Orchestration",
-    "Full-Stack Ops"
-  ],
-  status: "ACTIVE_SEEKING"
-};`}
-                       </pre>
-                    </div>
-
-                    <div className="space-y-4">
-                       {[
-                         { icon: GraduationCap, label: "Education", val: "B.Tech CS (Data Science)" },
-                         { icon: MapPin, label: "Coordinates", val: "India — Remote OK" }
-                       ].map((item, i) => (
-                         <div key={i} className="flex items-center gap-3 group/info">
-                            <div className="w-8 h-8 rounded-lg bg-primary/5 border border-primary/10 flex items-center justify-center text-primary/40 group-hover/info:text-primary transition-colors">
-                               <item.icon size={14} />
-                            </div>
-                            <div>
-                               <p className="text-[7px] font-mono text-primary/20 uppercase tracking-widest">{item.label}</p>
-                               <p className="text-[10px] font-mono text-muted-foreground">{item.val}</p>
-                            </div>
-                         </div>
-                       ))}
-                    </div>
-                 </div>
-
-                 <div className="pt-8 mt-6 border-t border-white/5 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                       <div className="w-1.5 h-1.5 rounded-full bg-primary/40 animate-pulse" />
-                       <span className="text-[8px] font-mono text-primary/30 uppercase tracking-widest">Sys_Status: OPTIMAL</span>
-                    </div>
-                    <Activity size={14} className="text-primary/10" />
-                 </div>
-              </div>
-
-              {/* Right Pane: Identity Narrative */}
-              <div className="p-6 sm:p-8 lg:p-10 flex flex-col justify-center space-y-8 bg-transparent relative">
-                  {/* Subtle BG Branding */}
-                  <div className="absolute top-0 right-0 p-8 opacity-[0.02] pointer-events-none">
-                     <Globe size={240} className="text-primary" />
-                  </div>
-
-                  <div className="space-y-6 relative z-10">
-                    <div className="space-y-2">
-                      <div className="w-8 h-1 bg-primary/30 rounded-full" />
-                      <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white/90">System Identity <span className="text-primary italic font-serif">Analysis</span></h3>
-                    </div>
-
-                    <div className="space-y-5">
-                       <div className="flex items-center gap-3 text-[12px] font-mono text-primary/40">
-                          <span className="italic">Initializing scan...</span>
-                          <span className="text-primary font-bold uppercase tracking-widest">Complete</span>
-                          <span className="w-1.5 h-3 bg-primary/40 animate-pulse" />
-                       </div>
-
-                       <div className="prose prose-invert prose-sm max-w-none">
-                          <p className="text-gray-300/80 leading-relaxed text-[13px] md:text-[14px]">
-                            <span className="text-white/90 font-bold text-lg md:text-xl block mb-3 border-l-2 border-primary/40 pl-4 py-1 bg-primary/[0.02]">Lakshya Gupta — Developer profile detected.</span>
-                            Builds apps, experiments with AI, and lives somewhere between clean logic and controlled chaos. Known to run on caffeine and minimal sleep, constantly breaking things just to rebuild them better. Focused on creating smooth user experiences backed by solid logic, while occasionally debugging code at 3 AM for no reason.
-                          </p>
-                       </div>
-
-                       <div className="pt-4">
-                          <div className="flex items-center gap-2 text-[10px] font-mono text-primary/60 border border-primary/20 bg-primary/5 px-4 py-2 rounded-lg uppercase tracking-widest w-fit animate-pulse">
-                             <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                             Status: Sleep not found. System still running.
-                          </div>
-                       </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-8 border-t border-white/5 flex items-center gap-4 relative z-10">
-                     <div className="flex -space-x-2">
-                        {[1,2,3].map(i => (
-                           <div key={i} className="w-8 h-8 rounded-full border border-white/10 bg-white/[0.03] flex items-center justify-center text-[10px] font-mono text-primary/60 hover:text-primary transition-colors cursor-crosshair">λ</div>
-                        ))}
-                     </div>
-                     <div className="space-y-0.5">
-                        <p className="text-[8px] font-mono text-primary/40 uppercase tracking-widest leading-none">Collaborative Nodes</p>
-                        <p className="text-[10px] font-mono text-muted-foreground">Scanning external networks...</p>
-                     </div>
-                  </div>
-              </div>
-            </div>
+            <span className="absolute left-0 w-full text-center font-bold" style={{ top: "85.5%", fontSize: "clamp(24px, 2.2vw, 32px)", color: "#1B2F8F" }}>
+              me, probably debugging
+            </span>
           </div>
-        </motion.div>
+          <div className="ab-tape" style={{ left: -30, background: "rgba(250,26,29,0.55)", transform: "rotate(-32deg)" }} />
+          <div className="ab-tape" style={{ right: -30, background: "rgba(116,212,240,0.75)", transform: "rotate(30deg)" }} />
+        </div>
+        <svg className="ab-rocket" viewBox="0 0 170 170" aria-hidden>
+          <g className="ab-rocket-bob" style={{ transformOrigin: "85px 85px" }}>
+            <path data-doodle="rocket" className="ab-draw" d="M85 14 C 110 36, 116 74, 104 108 H66 C 54 74, 60 36, 85 14 Z M85 50 A10 10 0 1 1 84.9 50 M66 96 L48 118 L66 112 M104 96 L122 118 L104 112 M76 116 L72 146 M85 116 V156 M94 116 L98 146" pathLength={1} fill="none" stroke="#1B2F8F" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        </svg>
+      </div>
+
+      <span className="ab-page">p. 01</span>
+      <div className="ab-ear" aria-hidden />
+      <div className="ab-tear" aria-hidden>
+        <div className="ab-tear-shadow" />
+        <div className="ab-tear-black" />
       </div>
     </section>
   );
